@@ -446,9 +446,9 @@ img {
    flow at the #about tablet breakpoint further down. */
 #imagetop {
   height: 320px;
-  width: 240px;
+  width: 300px;
   position: absolute;
-  right: 6%;
+  right: 25%;
   top: 20px;
   border: 1px solid white;
   border-radius: 20px;
@@ -471,9 +471,9 @@ img {
 
 #imagebottom {
   height: 320px;
-  width: 240px;
+  width: 300px;
   position: absolute;
-  right: -2%;
+  right: 17%;
   top: 180px;
   border: 1px solid white;
   border-radius: 20px;
