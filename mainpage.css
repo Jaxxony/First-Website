@@ -597,14 +597,31 @@ img {
     opacity: 1;
     transform: translateY(0);
     z-index: 1000;
+    animation: pulse-ring 1.5s ease-out infinite;
 }
 
 .quotebutton.visible:hover {
     transform: translateY(0) scale(1.2);
     z-index: 1000;
+    animation-play-state: paused;
 }
 
-/* ============================
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(0) scale(1.06);
+    }
+    70% {
+        box-shadow: 0 0 0 24px rgba(255, 255, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        transform: translateY(0) scale(1);
+    }
+}/* ============================
    SMALL ACCENT TEXT (.des2 / .des3)
    ============================ */
 .des2, .des3 {
