@@ -10,35 +10,27 @@
 
 html {
     scroll-behavior: smooth;
-    overflow: hidden;
 }
 
 html, body {
-    height: 100%;
+    margin: 0;
 }
 
 body {
-    background: gray; /* shows as letterbox bars around the canvas on mismatched aspect ratios */
-    position: fixed;
-    inset: 0;
-    overflow: hidden; /* position: fixed on body is what actually blocks scrolling/panning on iOS — overflow: hidden alone isn't reliable there */
+    background: gray;
+    overflow-x: hidden; /* the canvas is scaled to exactly match screen width, so this is just a safety net against any transform rounding */
 }
 
 /* The whole site lives inside this fixed-size canvas. JS at the bottom of
-   index.html scales this single element to fit any screen, so the page
-   keeps identical proportions everywhere instead of reflowing per device.
-   Positioned at the exact center and scaled from there (rather than
-   centered with flexbox), since a CSS transform doesn't shrink the space
-   a flex layout thinks the canvas occupies — that mismatch was causing
-   the off-center gap on wide monitors and the phantom scroll area on
-   phones. Change DESIGN_WIDTH in that script if you want a different
+   index.html scales this single element to match the screen's width
+   (transform-origin: top left keeps it pinned to the top of the page),
+   so the page keeps identical proportions everywhere instead of
+   reflowing per device, while still scrolling normally like a regular
+   webpage. Change DESIGN_WIDTH in that script if you want a different
    reference size. */
 #site-canvas {
     width: 1512px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1);
+    transform-origin: top left;
 }
 
 /* Safety net: no image is ever allowed to be wider than its container,
