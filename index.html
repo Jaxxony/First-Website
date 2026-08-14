@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="mainpage.css">
 </head>
 <body>
-<div id="site-canvas">
             <nav class="top-bar">
   <a href="#home" class="logo">Custom Flatpacks Adelaide</a>
   <button class="nav-toggle" id="navToggle" aria-label="Menu" type="button">☰</button>
@@ -115,7 +114,8 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
         </iframe>
     </div>
 </div>
-</div><!-- /#site-canvas -->
+
+
 
 
 
@@ -239,26 +239,6 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
     emailPanel.classList.remove('open');
     emailForm.reset();
   });
-</script>
-<script>
-  // Scales the whole #site-canvas uniformly so the site keeps the same
-  // proportions on every screen — phone, laptop, huge desktop monitor —
-  // instead of reflowing per device. Letterbox bars (the body's gray
-  // background) fill any leftover space when the screen's aspect ratio
-  // doesn't match the canvas's.
-  const DESIGN_WIDTH = 1512; // the width this layout was built at
-  const canvas = document.getElementById('site-canvas');
-
-  function fitToScreen() {
-    const scale = window.innerWidth / DESIGN_WIDTH;
-    canvas.style.transform = `scale(${scale})`;
-  }
-
-  window.addEventListener('resize', fitToScreen);
-  window.addEventListener('load', fitToScreen);
-  // Re-measure once images have finished loading, since they can change
-  // the canvas's natural height after the initial load event fires.
-  window.addEventListener('load', () => setTimeout(fitToScreen, 300));
 </script>
 </body>
 </html>
