@@ -19,6 +19,14 @@ body {
     overflow-x: hidden;
 }
 
+/* Safety net: no image is ever allowed to be wider than its container,
+   on any screen size. This is the single biggest cause of horizontal
+   scrollbars / overflow on phones and small tablets. */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 .mainheader {
     left: 20px;
     top: 5px;
@@ -40,8 +48,8 @@ body {
   color: white;
   display: flex;
   justify-content: space-between;
-  align-items: center; 
-  padding: 0 20px;       
+  align-items: center;
+  padding: 0 20px;
   z-index: 6000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     background-color: rgba(0, 0, 0, 0.25);
@@ -52,7 +60,6 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .top-bar.visible {
@@ -67,11 +74,12 @@ body {
 }
 
 .logo {
-  font-size: 24px;
+  font-size: clamp(16px, 2vw, 24px);
   font-weight: bold;
   flex: 1;
   text-decoration: none;
   color: white;
+  white-space: nowrap;
 }
 
 .nav-toggle {
@@ -99,6 +107,8 @@ body {
   gap: 20px;
   align-items: center;
   margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .nav-links a {
@@ -108,6 +118,7 @@ body {
   border-radius: 8px;
   font-size: 12px;
   width: fit-content;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -119,8 +130,6 @@ body {
   transition: all 0.3s ease;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 60px;
-
 }
 
 .nav-links a.active {
@@ -166,7 +175,7 @@ body {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: 260px;
+  width: min(260px, 90vw);
   background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -201,6 +210,7 @@ body {
   font-size: 13px;
   font-family: sans-serif;
   resize: vertical;
+  width: 100%;
 }
 
 .dropdown-panel input::placeholder,
@@ -243,6 +253,8 @@ body {
     color: white;
     border-bottom: 5px solid white;
     color: black;
+    position: relative;
+    overflow: hidden;
 }
 
 /* ============================
@@ -251,6 +263,7 @@ body {
 #home {
     color: white;
     height: 100vh;
+    min-height: 560px;
     padding-top: 60px;
     background-image: url("./images/5.jpg");
     background-size: cover;
@@ -258,7 +271,7 @@ body {
     background-repeat: no-repeat;
 }
 
-#gallery { 
+#gallery {
     background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
     background-size: cover;
     background-position: center;
@@ -280,7 +293,8 @@ body {
     font-size: 13px;
 }
 
-/* Contact card — now a two-column flex layout: text on the left, map on the right */
+/* Contact card — two-column flex layout: text on the left, map on the right.
+   Wraps to a single column automatically once there isn't room for both. */
 .contactme {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -295,14 +309,11 @@ body {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    margin-left: 40px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin: 30px auto;
     display: flex;
     flex-wrap: wrap;
     gap: 32px;
     align-items: stretch;
-    white-space: nowrap;
 }
 
 .contactme.visible {
@@ -312,6 +323,7 @@ body {
 
 .contact-details {
     flex: 1 1 300px;
+    min-width: 0;
 }
 
 .map-embed {
@@ -337,6 +349,8 @@ body {
 
 .contactme p {
     margin-bottom: 10px;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .contactme a {
@@ -360,13 +374,12 @@ body {
    SECTION TEXT (headings/description)
    ============================ */
 .content h1 {
-    font-size: 70px;
+    font-size: clamp(28px, 6vw, 70px);
     display: flex;
     flex-direction: column;
     font-weight: bold;
     padding: 10px;
     margin-left: 30px;
-    top: 20px;
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
@@ -380,7 +393,7 @@ body {
 .description {
     position: absolute;
     margin-top: 20px;
-    font-size: 20px;
+    font-size: clamp(14px, 1.6vw, 20px);
     margin-left: 45px;
     opacity: 0;
     transform: translateY(40px);
@@ -395,14 +408,17 @@ body {
   color: white;
   height: auto;
   position: relative;
+  padding-bottom: 40px;
+  overflow: hidden;
 }
 #aboutus {
   padding: 10px;
   color: white;
   text-transform: capitalize;
   max-width: 600px;
+  width: min(90%, 600px);
   margin-left: 35px;
-  font-size: 22px;
+  font-size: clamp(14px, 1.6vw, 22px);
   margin-bottom: 35px ;
       background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -412,7 +428,6 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -423,21 +438,27 @@ body {
 }
 
 #aboutus.visible:hover {
-    transform: translateY(0) scale(1.1);
+    transform: translateY(0) scale(1.03);
     z-index: 1000;
 }
+
+/* These two photos float beside the about text on wide screens. Using
+   right-edge positioning (instead of a fixed left:700px/900px) means
+   they scale with the container instead of sliding off narrower
+   laptop and tablet screens. They're pulled back into normal document
+   flow at the #about tablet breakpoint further down. */
 #imagetop {
-  height: 400px;
-  width: 300px;
-  left: 700px;
-  display: flex;
+  height: 320px;
+  width: 240px;
   position: absolute;
+  right: 6%;
   top: 20px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  object-fit: cover;
 }
 
 #imagetop.visible {
@@ -447,22 +468,22 @@ body {
 }
 
 #imagetop.visible:hover {
-  transform: translateY(0) scale(1.1);
+  transform: translateY(0) scale(1.08);
   z-index: 1000;
 }
 
 #imagebottom {
-  height: 400px;
-  width: 300px;
-  left: 900px;
-  display: flex;
+  height: 320px;
+  width: 240px;
   position: absolute;
-  top: 160px;
+  right: -2%;
+  top: 180px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  object-fit: cover;
 }
 
 #imagebottom.visible {
@@ -472,7 +493,7 @@ body {
 }
 
 #imagebottom.visible:hover {
-  transform: translateY(0) scale(1.1);
+  transform: translateY(0) scale(1.08);
   z-index: 1200;
 }
 /* ============================
@@ -484,20 +505,18 @@ body {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 24px 28px;
+    padding: 18px 24px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
     position: absolute;
-    margin-top: 17%;
-    margin-left: 85%;
+    right: 6%;
+    bottom: 12%;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: white;
     text-decoration: none;
     font-size: 11px;
-    text-transform: uppercase;
     z-index: 1000;
 }
 
@@ -508,7 +527,7 @@ body {
 }
 
 .quotebutton.visible:hover {
-    transform: translateY(0) scale(1.2);
+    transform: translateY(0) scale(1.15);
     z-index: 1000;
 }
 
@@ -521,11 +540,11 @@ body {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 24px 28px;
+    padding: 18px 24px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
+    width: fit-content;
 }
 
 .des2.visible, .des3.visible {
@@ -534,15 +553,15 @@ body {
 }
 
 .des2.visible:hover, .des3.visible:hover {
-    transform: translateY(0) scale(1.2);
+    transform: translateY(0) scale(1.15);
 }
 
 .des2 {
     position: absolute;
-    margin-top: 10%;
-    margin-left: 73px;
+    top: 62%;
+    left: 45px;
     font-family: 'Inter', sans-serif;
-    font-size: 32px;
+    font-size: clamp(20px, 2.8vw, 32px);
     color: white;
     font-weight: 800;
     letter-spacing: -.03em;
@@ -550,9 +569,8 @@ body {
 
 .des3 {
     position: absolute;
-    margin-top: 17%;
-    margin-left: 45px;
-    font-size: 20px;
+    top: 78%;
+    left: 45px;
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -568,7 +586,8 @@ body {
     padding: 20px;
     flex-wrap: wrap;
     margin-top: 0px;
-        border-bottom: 5px solid white;
+    border-bottom: 5px solid white;
+    justify-content: center;
 }
 
 .gallery img {
@@ -580,7 +599,7 @@ body {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    
+
 }
 
 .gallery img.visible {
@@ -589,7 +608,7 @@ body {
 }
 
 .gallery img:hover {
-    transform: scale(2.2);
+    transform: scale(1.3);
 }
 
 .gallery img.visible:hover {
@@ -601,8 +620,9 @@ body {
     text-align: center;
     margin-top: 30px;
     color: white;
+    font-size: clamp(18px, 3vw, 32px);
     transform: translateY(40px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .gallery h1.visible {
     opacity: 1;
@@ -616,11 +636,54 @@ body {
 }
 
 /* ============================
-   MOBILE / TABLET RESPONSIVE
-   ============================ */
+   RESPONSIVE BREAKPOINTS
+   ============================
+   Three tiers instead of two: desktop, a mid tier for tablets and
+   small laptops (this is the range the original CSS left unhandled,
+   where absolute-positioned pixel offsets used to overflow), and a
+   phone tier. */
+
+/* ---- Small laptops / large tablets ---- */
+@media (max-width: 1200px) {
+  #imagetop {
+    width: 200px;
+    height: 260px;
+    right: 4%;
+  }
+  #imagebottom {
+    width: 200px;
+    height: 260px;
+    right: -3%;
+    top: 160px;
+  }
+}
+
+/* ---- Tablets ---- */
 @media (max-width: 900px) {
   .content h1 {
-    font-size: 44px;
+    font-size: clamp(26px, 5vw, 44px);
+  }
+
+  /* The floating photos no longer have room beside the text —
+     drop them into normal flow below the about text instead of
+     letting them overlap it. */
+  #about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #imagetop,
+  #imagebottom {
+    position: static;
+    width: min(80%, 320px);
+    height: 260px;
+    margin: 0 auto 20px;
+  }
+
+  .quotebutton {
+    right: 4%;
+    bottom: 8%;
   }
 }
 
@@ -709,7 +772,7 @@ body {
   }
 
   .content h1 {
-    font-size: 34px;
+    font-size: clamp(26px, 8vw, 34px);
     margin-left: 0;
     padding: 0;
   }
@@ -718,13 +781,11 @@ body {
     position: static;
     margin-left: 0;
     margin-top: 16px;
-    font-size: 16px;
   }
 
   .des2 {
     position: static;
     margin: 20px 0 0;
-    font-size: 26px;
   }
 
   .des3 {
@@ -745,7 +806,6 @@ body {
   }
 
   .gallery h1 {
-    font-size: 24px;
     padding: 10px;
   }
 
@@ -753,20 +813,19 @@ body {
   #contact {
     font-size: 15px;
     padding-left: 0;
+    left: 0;
   }
 
   .contactme {
     flex-direction: column;
     width: 92%;
-    margin-left: 4%;
+    margin: 20px auto;
     padding: 24px 20px;
   }
 
   .contactme p,
   .contactme a {
     font-size: 15px;
-    overflow-wrap: break-word;
-    word-break: break-word;
   }
 
   .contactme h1 {
@@ -784,14 +843,6 @@ body {
     height: 200px;
   }
 
-  .content h1 {
-    font-size: 28px;
-  }
-
-  .des2 {
-    font-size: 22px;
-  }
-
   #contact {
     font-size: 13px;
   }
@@ -803,5 +854,14 @@ body {
 
   .contactme h1 {
     font-size: 24px;
+  }
+}
+
+/* ---- Landscape phones with short viewport height (avoids a full-height
+       hero section forcing the user to scroll to see the CTA button) ---- */
+@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  #home {
+    min-height: auto;
+    padding: 90px 20px 40px;
   }
 }
