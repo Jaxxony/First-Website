@@ -13,7 +13,7 @@ html {
 }
 
 body {
-    background: gray;
+    background: white;
     height: 100%;
     width: 100%;
     overflow-x: hidden;
@@ -52,7 +52,7 @@ img {
   padding: 0 20px;
   z-index: 6000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.50);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -80,6 +80,7 @@ img {
   text-decoration: none;
   color: white;
   white-space: nowrap;
+  z-index: 2000;
 }
 
 .nav-toggle {
@@ -289,7 +290,26 @@ img {
     color: black;
     font-size: 13px;
 }
-
+#services {
+  color: white;
+      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#about {
+      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#contact {
+      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  overflow: auto;
+}
 /* Contact card — two-column flex layout: text on the left, map on the right.
    Wraps to a single column automatically once there isn't room for both. */
 .contactme {
@@ -439,6 +459,47 @@ img {
     z-index: 1000;
 }
 
+/* One box for the whole Services text block — every line inside it is a
+   plain <p>, so they all share this single background instead of each
+   line getting its own. */
+.servicestxt {
+  color: white;
+  text-transform: capitalize;
+  max-width: 600px;
+  width: min(90%, 600px);
+  margin-left: 35px;
+  margin-bottom: 35px;
+  font-size: clamp(14px, 1.6vw, 22px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px 28px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.servicestxt.visible {
+  opacity: 1;
+  transform: translateY(0);
+  z-index: 1000;
+}
+
+.servicestxt.visible:hover {
+  transform: translateY(0) scale(1.03);
+  z-index: 1000;
+}
+
+.servicestxt p {
+  margin-bottom: 10px;
+}
+
+.servicestxt p:last-child {
+  margin-bottom: 0;
+}
+
 /* These two photos float beside the about text on wide screens. Using
    right-edge positioning (instead of a fixed left:700px/900px) means
    they scale with the container instead of sliding off narrower
@@ -446,7 +507,7 @@ img {
    flow at the #about tablet breakpoint further down. */
 #imagetop {
   height: 320px;
-  width: 300px;
+  width: 240px;
   position: absolute;
   right: 25%;
   top: 20px;
@@ -468,12 +529,22 @@ img {
   transform: translateY(0) scale(1.08);
   z-index: 1000;
 }
+.servicestxt p {
+  padding-left: 18px;
+  position: relative;
+}
 
+.servicestxt p::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: white;
+}
 #imagebottom {
   height: 320px;
-  width: 300px;
+  width: 240px;
   position: absolute;
-  right: 17%;
+  right: 16%;
   top: 180px;
   border: 1px solid white;
   border-radius: 20px;
