@@ -10,15 +10,17 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden; /* this is the element that actually scrolls in most browsers — overflow-x here (not just on body) is what stops sideways scrolling */
 }
 
 html, body {
     margin: 0;
+    width: 100%;
 }
 
 body {
     background: gray;
-    overflow-x: hidden; /* the canvas is scaled to exactly match screen width, so this is just a safety net against any transform rounding */
+    overflow-x: hidden; /* belt-and-suspenders alongside the html rule above */
 }
 
 /* The whole site lives inside this fixed-size canvas. JS at the bottom of
