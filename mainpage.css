@@ -10,29 +10,13 @@
 
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden; /* this is the element that actually scrolls in most browsers — overflow-x here (not just on body) is what stops sideways scrolling */
-}
-
-html, body {
-    margin: 0;
-    width: 100%;
 }
 
 body {
     background: gray;
-    overflow-x: hidden; /* belt-and-suspenders alongside the html rule above */
-}
-
-/* The whole site lives inside this fixed-size canvas. JS at the bottom of
-   index.html scales this single element to match the screen's width
-   (transform-origin: top left keeps it pinned to the top of the page),
-   so the page keeps identical proportions everywhere instead of
-   reflowing per device, while still scrolling normally like a regular
-   webpage. Change DESIGN_WIDTH in that script if you want a different
-   reference size. */
-#site-canvas {
-    width: 1512px;
-    transform-origin: top left;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* Safety net: no image is ever allowed to be wider than its container,
@@ -90,7 +74,7 @@ img {
 }
 
 .logo {
-  font-size: 24px;
+  font-size: clamp(16px, 2vw, 24px);
   font-weight: bold;
   flex: 1;
   text-decoration: none;
@@ -189,7 +173,7 @@ img {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: 260px;
+  width: min(260px, 90vw);
   background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -274,7 +258,8 @@ img {
    ============================ */
 #home {
     color: white;
-    height: 900px;
+    height: 100vh;
+    min-height: 560px;
     padding-top: 60px;
     background-image: url("./images/5.jpg");
     background-size: cover;
@@ -386,7 +371,7 @@ img {
    SECTION TEXT (headings/description)
    ============================ */
 .content h1 {
-    font-size: 70px;
+    font-size: clamp(28px, 6vw, 70px);
     display: flex;
     flex-direction: column;
     font-weight: bold;
@@ -405,7 +390,7 @@ img {
 .description {
     position: absolute;
     margin-top: 20px;
-    font-size: 20px;
+    font-size: clamp(14px, 1.6vw, 20px);
     margin-left: 45px;
     opacity: 0;
     transform: translateY(40px);
@@ -430,7 +415,7 @@ img {
   max-width: 600px;
   width: min(90%, 600px);
   margin-left: 35px;
-  font-size: 22px;
+  font-size: clamp(14px, 1.6vw, 22px);
   margin-bottom: 35px ;
       background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -522,7 +507,7 @@ img {
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
     position: absolute;
-    bottom: 8%;
+    bottom: 8vh;
     margin-left: 85%;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -570,10 +555,10 @@ img {
 
 .des2 {
     position: absolute;
-    bottom: 20%;
+    bottom: 20vh;
     margin-left: 73px;
     font-family: 'Inter', sans-serif;
-    font-size: 32px;
+    font-size: clamp(20px, 2.8vw, 32px);
     color: white;
     font-weight: 800;
     letter-spacing: -.03em;
@@ -581,7 +566,7 @@ img {
 
 .des3 {
     position: absolute;
-    bottom: 8%;
+    bottom: 8vh;
     margin-left: 45px;
     font-size: 11px;
     letter-spacing: .1em;
@@ -632,7 +617,7 @@ img {
     text-align: center;
     margin-top: 30px;
     color: white;
-    font-size: 32px;
+    font-size: clamp(18px, 3vw, 32px);
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
@@ -650,11 +635,228 @@ img {
 /* ============================
    RESPONSIVE BREAKPOINTS
    ============================
-   Intentionally none. The old per-device breakpoints (hamburger menu,
-   stacked mobile layout, etc.) have been removed on purpose: the site
-   now always renders at its one fixed desktop layout, and the
-   #site-canvas scaling script in index.html shrinks or enlarges that
-   whole layout uniformly to fit the current screen. That keeps the
-   proportions identical everywhere, at the cost of things like nav
-   links and form fields becoming small on a phone since nothing
-   reflows anymore. */
+   Three tiers: desktop, a mid tier for tablets and small laptops
+   (the range where absolute-positioned pixel offsets used to
+   overflow), and a phone tier that switches to a hamburger menu
+   and a stacked, readable layout. */
+
+/* ---- Small laptops / large tablets ---- */
+@media (max-width: 1200px) {
+  #imagetop {
+    width: 200px;
+    height: 260px;
+    right: 4%;
+  }
+  #imagebottom {
+    width: 200px;
+    height: 260px;
+    right: -3%;
+    top: 160px;
+  }
+}
+
+/* ---- Tablets ---- */
+@media (max-width: 900px) {
+  .content h1 {
+    font-size: clamp(26px, 5vw, 44px);
+  }
+
+  /* The floating photos no longer have room beside the text —
+     drop them into normal flow below the about text instead of
+     letting them overlap it. */
+  #about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #imagetop,
+  #imagebottom {
+    position: static;
+    width: min(80%, 320px);
+    height: 260px;
+    margin: 0 auto 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Nav bar becomes a hamburger menu */
+  .top-bar {
+    padding: 14px 20px;
+    height: auto;
+  }
+
+  .nav-toggle {
+    display: block;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 20px;
+    left: 20px;
+    width: auto;
+    flex-direction: column;
+    align-items: stretch;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+    gap: 4px;
+  }
+
+  .nav-links.nav-open {
+    display: flex;
+  }
+
+  .nav-group {
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0;
+    gap: 4px;
+  }
+
+  .nav-links a {
+    padding: 12px;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .nav-dropdown {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dropdown-toggle {
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .dropdown-panel {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    transform: none;
+  }
+
+  .dropdown-panel.open {
+    transform: none;
+  }
+
+  /* Hero section: switch from absolute-positioned desktop layout to a stacked flow */
+  #home {
+    height: auto;
+    min-height: 100vh;
+    padding: 100px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .content h1 {
+    font-size: clamp(26px, 8vw, 34px);
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .description {
+    position: static;
+    margin-left: 0;
+    margin-top: 16px;
+  }
+
+  .des2 {
+    position: static;
+    bottom: auto;
+    margin: 20px 0 0;
+  }
+
+  .des3 {
+    position: static;
+    bottom: auto;
+    margin: 10px 0 0;
+  }
+
+  .quotebutton {
+    position: static;
+    bottom: auto;
+    margin: 24px 0 0;
+    display: inline-block;
+  }
+
+  /* Gallery: smaller tiles that fit small screens without overflow */
+  .gallery img {
+    width: calc(50% - 10px);
+    height: 160px;
+  }
+
+  .gallery h1 {
+    padding: 10px;
+  }
+
+  /* Contact section: stack columns, shrink text so nothing overflows the screen edge */
+  #contact {
+    font-size: 15px;
+    padding-left: 0;
+    left: 0;
+  }
+
+  .contactme {
+    flex-direction: column;
+    width: 92%;
+    margin: 20px auto;
+    padding: 24px 20px;
+  }
+
+  .contactme p,
+  .contactme a {
+    font-size: 15px;
+  }
+
+  .contactme h1 {
+    font-size: 28px;
+  }
+
+  .map-embed {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery img {
+    width: 100%;
+    height: 200px;
+  }
+
+  #contact {
+    font-size: 13px;
+  }
+
+  .contactme p,
+  .contactme a {
+    font-size: 13px;
+  }
+
+  .contactme h1 {
+    font-size: 24px;
+  }
+}
+
+/* ---- Landscape phones with short viewport height (avoids a full-height
+       hero section forcing the user to scroll to see the CTA button) ---- */
+@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  #home {
+    min-height: auto;
+    padding: 90px 20px 40px;
+  }
+}
