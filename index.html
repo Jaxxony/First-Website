@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Flatpacks Adelaide</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/2979/2979677.png">
+    <link rel="stylesheet" href="mainpage.css">
+</head>
+<body>
+            <nav class="top-bar">
+  <a href="#home" class="logo">Custom Flatpacks Adelaide</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" type="button">☰</button>
+<ul class="nav-links" id="navLinks">
+  <li class="nav-group">
+    <a href="#home">Home</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </li>
+  <li class="nav-dropdown">
+    <button class="dropdown-toggle" id="emailToggle" type="button">Email Us ▾</button>
+    <div class="dropdown-panel" id="emailPanel">
+      <form id="emailForm">
+        <input type="text" id="fromName" placeholder="Your Name" required>
+        <input type="email" id="fromEmail" placeholder="Your Email" required>
+        <textarea id="messageBody" placeholder="Your Message" rows="4" required></textarea>
+        <button type="submit" class="dropdown-send">Send</button>
+      </form>
+    </div>
+  </li>
+</ul>
+    </nav>
+<!-- Main content placeholder -->
+<div id="home" class="content">
+  <h1 class="stacked">
+    <span>Professional and</span>
+    <span>Experienced</span>
+    <span>Flatpack Makers.</span>
+
+  </h1>
+  <p class="description">Built Smart. Packed Flat. Made to Last.</p>
+  <p class="des2">100%</p>
+    <p class="des3">Quality Guarantee</p>
+    <a class="quotebutton" href="#contact">Request A Quote!</a>
+    
+
+</div>
+<div id="gallery" class="gallery">
+  <h1 class="gallerytext">Does Your Kitchen Look Like This?</h1>
+    <img src="./images/1.jpg">
+    <img src="./images/2.jpg">
+    <img src="./images/3.jpg">
+    <img src="./images/4.jpg">
+    <img src="./images/5.jpg">
+    <img src="./images/6.jpg">
+    <h1 class="gallerytext">Do You Want It To look like this?</h1>
+    <img src="./images/2.jpg">
+    <img src="./images/3.jpg">
+    <img src="./images/4.jpg">
+    <img src="./images/5.jpg">
+    <img src="./images/6.jpg">
+
+</div>
+
+<div id="services" class="content">
+  <h1>Our Services</h1>
+</div>
+
+<div id="about" class="content">
+  <h1>About Us</h1>
+  <p id="aboutus">At Custom Flatpacks Adelaide, we believe your kitchen and cabinetry should be designed around you — not the other way around.
+We are a family-owned Adelaide business passionate about creating practical, stylish and personalised flatpack kitchens and cabinetry that suit your home, your lifestyle and your budget.
+Unlike the big-box approach, we pride ourselves on providing a personalised, local service from start to finish. We take the time to understand what you need, help you make the right choices and work with you to create a finished result you’ll be proud of.
+Whether you're renovating your kitchen, updating your cabinetry or creating a completely new space, we can help bring your ideas to life with custom solutions, personal service and attention to detail.</p>
+    <img id="imagebottom" src="./images/5.jpg">
+    <img id="imagetop" src="./images/6.jpg">
+
+
+
+
+</div>
+
+
+<div id="contact" class="contactme">
+    <div class="contact-details">
+        <h1>Contact Us!</h1>
+        <p class="heading2"><img src="./images/phone.png">Office</p>
+        <p><a href="tel:0870070790">08 7007 0790</a></p>
+        <p class="heading2"><img src="./images/mobile.png">Mobile</p>
+        <p><a href="tel:0431292290">0431 292 290</a></p>
+        <p class="heading2"><img src="./images/email.png">Email</p>
+        <p><a href="mailto:sales@cabinetmakersadelaide.net.au">sales@cabinetmakersadelaide.net.au</a></p>
+        <hr>
+        <p><img src="./images/pin.png">Workshop</p>
+        <p><a href="https://www.google.com/maps/@-34.8298295,138.6015435,3a,75y,224.57h,90t/data=!3m10!1e1!3m8!1szW0rrmVqtpfdhFHw1RNXqw!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D0%26panoid%3DzW0rrmVqtpfdhFHw1RNXqw%26yaw%3D224.57396!7i16384!8i8192!9m2!1b1!2i50?entry=ttu&g_ep=EgoyMDI2MDgxMC4wIKXMDSoASAFQAw%3D%3D">10–12 Thomas St, Cavan SA 5094</a></p>
+        <hr>
+        <p><img src="./images/clock.png">Opening Hours</p>
+        <p>Monday – Thursday: 8:00am – 5:00pm</p>
+        <p>Friday: 8:00am – 4:00pm</p>
+        <p>Saturday: By appointment</p>
+        <p>Sunday: Closed</p>
+    </div>
+    <div class="map-embed">
+        <iframe
+            src="https://www.google.com/maps?q=10-12+Thomas+St,+Cavan+SA+5094&output=embed"
+            width="100%"
+            height="100%"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  const sections = document.querySelectorAll('#home, #gallery, #services, #about, #contact');
+  const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+
+  function updateActiveLink() {
+    let current = sections[0].getAttribute('id');
+    const triggerPoint = 80; // just below the 70px nav bar
+
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= triggerPoint) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveLink);
+  updateActiveLink(); // run once on load too
+</script>
+<script>
+  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .des2, .des3, .quotebutton, .top-bar, .gallery h1, .contactme, .description, #aboutus, #imagetop, #imagebottom');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      } else {
+        entry.target.classList.remove('visible');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  fadeElements.forEach(el => observer.observe(el));
+</script>
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href').substring(1);
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const targetRect = target.getBoundingClientRect();
+      const targetCenter = targetRect.top + window.scrollY + (target.offsetHeight / 2);
+      const scrollTo = targetCenter - (window.innerHeight / 2);
+
+      window.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
+      });
+
+      document.getElementById('navLinks').classList.remove('nav-open');
+    });
+  });
+</script>
+<script>
+  // Mobile hamburger menu toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinksMenu = document.getElementById('navLinks');
+
+  navToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navLinksMenu.classList.toggle('nav-open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!navLinksMenu.contains(e.target) && e.target !== navToggle) {
+      navLinksMenu.classList.remove('nav-open');
+    }
+  });
+</script>
+<script>
+  // Email dropdown toggle
+  const emailToggle = document.getElementById('emailToggle');
+  const emailPanel = document.getElementById('emailPanel');
+
+  emailToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    emailPanel.classList.toggle('open');
+  });
+
+  // Close panel when clicking outside it
+  document.addEventListener('click', (e) => {
+    if (!emailPanel.contains(e.target) && e.target !== emailToggle) {
+      emailPanel.classList.remove('open');
+    }
+  });
+
+  // Build a mailto link from the form and open it
+  const emailForm = document.getElementById('emailForm');
+  emailForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('fromName').value;
+    const fromEmail = document.getElementById('fromEmail').value;
+    const message = document.getElementById('messageBody').value;
+
+    const subject = encodeURIComponent(`Website enquiry from ${name}`);
+    const body = encodeURIComponent(`${message}\n\nFrom: ${name} (${fromEmail})`);
+
+    window.location.href = `mailto:sales@cabinetmakersadelaide.net.au?subject=${subject}&body=${body}`;
+
+    emailPanel.classList.remove('open');
+    emailForm.reset();
+  });
+</script>
+</body>
+</html>
