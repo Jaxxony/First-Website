@@ -310,6 +310,11 @@ img {
     background-repeat: no-repeat;
   overflow: auto;
 }
+#services {
+  color: white;
+  height: auto;
+  padding-bottom: 10px;
+}
 /* Contact card — two-column flex layout: text on the left, map on the right.
    Wraps to a single column automatically once there isn't room for both. */
 .contactme {
