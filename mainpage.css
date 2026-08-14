@@ -107,8 +107,6 @@ img {
   gap: 20px;
   align-items: center;
   margin: 0 auto;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 .nav-links a {
@@ -253,8 +251,6 @@ img {
     color: white;
     border-bottom: 5px solid white;
     color: black;
-    position: relative;
-    overflow: hidden;
 }
 
 /* ============================
@@ -505,13 +501,13 @@ img {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 18px 24px;
+    padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
     position: absolute;
-    right: 6%;
-    bottom: 12%;
+    margin-top: 17%;
+    margin-left: 85%;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: white;
@@ -527,7 +523,7 @@ img {
 }
 
 .quotebutton.visible:hover {
-    transform: translateY(0) scale(1.15);
+    transform: translateY(0) scale(1.2);
     z-index: 1000;
 }
 
@@ -540,7 +536,7 @@ img {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 18px 24px;
+    padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
@@ -553,13 +549,13 @@ img {
 }
 
 .des2.visible:hover, .des3.visible:hover {
-    transform: translateY(0) scale(1.15);
+    transform: translateY(0) scale(1.2);
 }
 
 .des2 {
     position: absolute;
-    top: 62%;
-    left: 45px;
+    margin-top: 10%;
+    margin-left: 73px;
     font-family: 'Inter', sans-serif;
     font-size: clamp(20px, 2.8vw, 32px);
     color: white;
@@ -569,8 +565,8 @@ img {
 
 .des3 {
     position: absolute;
-    top: 78%;
-    left: 45px;
+    margin-top: 17%;
+    margin-left: 45px;
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -679,11 +675,6 @@ img {
     width: min(80%, 320px);
     height: 260px;
     margin: 0 auto 20px;
-  }
-
-  .quotebutton {
-    right: 4%;
-    bottom: 8%;
   }
 }
 
