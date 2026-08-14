@@ -12,11 +12,36 @@ html {
     scroll-behavior: smooth;
 }
 
-body {
-    background: gray;
+html, body {
     height: 100%;
+    overflow: hidden; /* the whole design fits on screen — no scrollbars */
+}
+
+body {
+    background: gray; /* shows as letterbox bars around the canvas on mismatched aspect ratios */
     width: 100%;
-    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The whole site lives inside this fixed-size canvas. JS at the bottom of
+   index.html scales this single element to fit any screen, so the page
+   keeps identical proportions everywhere instead of reflowing per device.
+   Change DESIGN_WIDTH in that script if you want a different reference size. */
+#site-canvas {
+    width: 1512px;
+    flex-shrink: 0;
+    position: relative;
+    transform-origin: center center;
+}
+
+/* Safety net: no image is ever allowed to be wider than its container,
+   on any screen size. This is the single biggest cause of horizontal
+   scrollbars / overflow on phones and small tablets. */
+img {
+    max-width: 100%;
+    height: auto;
 }
 
 .mainheader {
@@ -40,8 +65,8 @@ body {
   color: white;
   display: flex;
   justify-content: space-between;
-  align-items: center; 
-  padding: 0 20px;       
+  align-items: center;
+  padding: 0 20px;
   z-index: 6000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     background-color: rgba(0, 0, 0, 0.25);
@@ -52,7 +77,6 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .top-bar.visible {
@@ -72,6 +96,7 @@ body {
   flex: 1;
   text-decoration: none;
   color: white;
+  white-space: nowrap;
 }
 
 .nav-toggle {
@@ -108,6 +133,7 @@ body {
   border-radius: 8px;
   font-size: 12px;
   width: fit-content;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -119,8 +145,6 @@ body {
   transition: all 0.3s ease;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 60px;
-
 }
 
 .nav-links a.active {
@@ -201,6 +225,7 @@ body {
   font-size: 13px;
   font-family: sans-serif;
   resize: vertical;
+  width: 100%;
 }
 
 .dropdown-panel input::placeholder,
@@ -250,15 +275,16 @@ body {
    ============================ */
 #home {
     color: white;
-    height: 100vh;
+    height: 900px;
     padding-top: 60px;
     background-image: url("./images/5.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    position: relative;
 }
 
-#gallery { 
+#gallery {
     background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
     background-size: cover;
     background-position: center;
@@ -280,7 +306,8 @@ body {
     font-size: 13px;
 }
 
-/* Contact card — now a two-column flex layout: text on the left, map on the right */
+/* Contact card — two-column flex layout: text on the left, map on the right.
+   Wraps to a single column automatically once there isn't room for both. */
 .contactme {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -295,14 +322,11 @@ body {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    margin-left: 40px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin: 30px auto;
     display: flex;
     flex-wrap: wrap;
     gap: 32px;
     align-items: stretch;
-    white-space: nowrap;
 }
 
 .contactme.visible {
@@ -312,6 +336,7 @@ body {
 
 .contact-details {
     flex: 1 1 300px;
+    min-width: 0;
 }
 
 .map-embed {
@@ -337,6 +362,8 @@ body {
 
 .contactme p {
     margin-bottom: 10px;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .contactme a {
@@ -366,7 +393,6 @@ body {
     font-weight: bold;
     padding: 10px;
     margin-left: 30px;
-    top: 20px;
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
@@ -395,12 +421,15 @@ body {
   color: white;
   height: auto;
   position: relative;
+  padding-bottom: 40px;
+  overflow: hidden;
 }
 #aboutus {
   padding: 10px;
   color: white;
   text-transform: capitalize;
   max-width: 600px;
+  width: min(90%, 600px);
   margin-left: 35px;
   font-size: 22px;
   margin-bottom: 35px ;
@@ -412,7 +441,6 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -423,21 +451,27 @@ body {
 }
 
 #aboutus.visible:hover {
-    transform: translateY(0) scale(1.1);
+    transform: translateY(0) scale(1.03);
     z-index: 1000;
 }
+
+/* These two photos float beside the about text on wide screens. Using
+   right-edge positioning (instead of a fixed left:700px/900px) means
+   they scale with the container instead of sliding off narrower
+   laptop and tablet screens. They're pulled back into normal document
+   flow at the #about tablet breakpoint further down. */
 #imagetop {
-  height: 400px;
-  width: 300px;
-  left: 700px;
-  display: flex;
+  height: 320px;
+  width: 240px;
   position: absolute;
+  right: 6%;
   top: 20px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  object-fit: cover;
 }
 
 #imagetop.visible {
@@ -447,22 +481,22 @@ body {
 }
 
 #imagetop.visible:hover {
-  transform: translateY(0) scale(1.1);
+  transform: translateY(0) scale(1.08);
   z-index: 1000;
 }
 
 #imagebottom {
-  height: 400px;
-  width: 300px;
-  left: 900px;
-  display: flex;
+  height: 320px;
+  width: 240px;
   position: absolute;
-  top: 160px;
+  right: -2%;
+  top: 180px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  object-fit: cover;
 }
 
 #imagebottom.visible {
@@ -472,7 +506,7 @@ body {
 }
 
 #imagebottom.visible:hover {
-  transform: translateY(0) scale(1.1);
+  transform: translateY(0) scale(1.08);
   z-index: 1200;
 }
 /* ============================
@@ -487,17 +521,15 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
     position: absolute;
-    margin-top: 17%;
+    bottom: 8%;
     margin-left: 85%;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: white;
     text-decoration: none;
     font-size: 11px;
-    text-transform: uppercase;
     z-index: 1000;
 }
 
@@ -524,8 +556,8 @@ body {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
-    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
+    width: fit-content;
 }
 
 .des2.visible, .des3.visible {
@@ -539,7 +571,7 @@ body {
 
 .des2 {
     position: absolute;
-    margin-top: 10%;
+    bottom: 20%;
     margin-left: 73px;
     font-family: 'Inter', sans-serif;
     font-size: 32px;
@@ -550,9 +582,8 @@ body {
 
 .des3 {
     position: absolute;
-    margin-top: 17%;
+    bottom: 8%;
     margin-left: 45px;
-    font-size: 20px;
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -568,7 +599,8 @@ body {
     padding: 20px;
     flex-wrap: wrap;
     margin-top: 0px;
-        border-bottom: 5px solid white;
+    border-bottom: 5px solid white;
+    justify-content: center;
 }
 
 .gallery img {
@@ -580,7 +612,7 @@ body {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    
+
 }
 
 .gallery img.visible {
@@ -589,7 +621,7 @@ body {
 }
 
 .gallery img:hover {
-    transform: scale(2.2);
+    transform: scale(1.3);
 }
 
 .gallery img.visible:hover {
@@ -601,8 +633,9 @@ body {
     text-align: center;
     margin-top: 30px;
     color: white;
+    font-size: 32px;
     transform: translateY(40px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .gallery h1.visible {
     opacity: 1;
@@ -616,193 +649,13 @@ body {
 }
 
 /* ============================
-   MOBILE / TABLET RESPONSIVE
-   ============================ */
-@media (max-width: 900px) {
-  .content h1 {
-    font-size: 44px;
-  }
-}
-
-@media (max-width: 768px) {
-  /* Nav bar becomes a hamburger menu */
-  .top-bar {
-    padding: 14px 20px;
-    height: auto;
-  }
-
-  .nav-toggle {
-    display: block;
-  }
-
-  .logo {
-    font-size: 18px;
-  }
-
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 20px;
-    left: 20px;
-    width: auto;
-    flex-direction: column;
-    align-items: stretch;
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 16px;
-    gap: 4px;
-  }
-
-  .nav-links.nav-open {
-    display: flex;
-  }
-
-  .nav-group {
-    flex-direction: column;
-    align-items: stretch;
-    margin: 0;
-    gap: 4px;
-  }
-
-  .nav-links a {
-    padding: 12px;
-    font-size: 15px;
-    width: 100%;
-  }
-
-  .nav-dropdown {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .dropdown-toggle {
-    width: 100%;
-    text-align: left;
-    padding: 12px;
-    font-size: 15px;
-  }
-
-  .dropdown-panel {
-    position: static;
-    width: 100%;
-    margin-top: 8px;
-    transform: none;
-  }
-
-  .dropdown-panel.open {
-    transform: none;
-  }
-
-  /* Hero section: switch from absolute-positioned desktop layout to a stacked flow */
-  #home {
-    height: auto;
-    min-height: 100vh;
-    padding: 100px 20px 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-  }
-
-  .content h1 {
-    font-size: 34px;
-    margin-left: 0;
-    padding: 0;
-  }
-
-  .description {
-    position: static;
-    margin-left: 0;
-    margin-top: 16px;
-    font-size: 16px;
-  }
-
-  .des2 {
-    position: static;
-    margin: 20px 0 0;
-    font-size: 26px;
-  }
-
-  .des3 {
-    position: static;
-    margin: 10px 0 0;
-  }
-
-  .quotebutton {
-    position: static;
-    margin: 24px 0 0;
-    display: inline-block;
-  }
-
-  /* Gallery: smaller tiles that fit small screens without overflow */
-  .gallery img {
-    width: calc(50% - 10px);
-    height: 160px;
-  }
-
-  .gallery h1 {
-    font-size: 24px;
-    padding: 10px;
-  }
-
-  /* Contact section: stack columns, shrink text so nothing overflows the screen edge */
-  #contact {
-    font-size: 15px;
-    padding-left: 0;
-  }
-
-  .contactme {
-    flex-direction: column;
-    width: 92%;
-    margin-left: 4%;
-    padding: 24px 20px;
-  }
-
-  .contactme p,
-  .contactme a {
-    font-size: 15px;
-    overflow-wrap: break-word;
-    word-break: break-word;
-  }
-
-  .contactme h1 {
-    font-size: 28px;
-  }
-
-  .map-embed {
-    min-height: 250px;
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery img {
-    width: 100%;
-    height: 200px;
-  }
-
-  .content h1 {
-    font-size: 28px;
-  }
-
-  .des2 {
-    font-size: 22px;
-  }
-
-  #contact {
-    font-size: 13px;
-  }
-
-  .contactme p,
-  .contactme a {
-    font-size: 13px;
-  }
-
-  .contactme h1 {
-    font-size: 24px;
-  }
-}
-
+   RESPONSIVE BREAKPOINTS
+   ============================
+   Intentionally none. The old per-device breakpoints (hamburger menu,
+   stacked mobile layout, etc.) have been removed on purpose: the site
+   now always renders at its one fixed desktop layout, and the
+   #site-canvas scaling script in index.html shrinks or enlarges that
+   whole layout uniformly to fit the current screen. That keeps the
+   proportions identical everywhere, at the cost of things like nav
+   links and form fields becoming small on a phone since nothing
+   reflows anymore. */
