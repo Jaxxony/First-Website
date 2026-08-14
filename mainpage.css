@@ -19,14 +19,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Safety net: no image is ever allowed to be wider than its container,
-   on any screen size. This is the single biggest cause of horizontal
-   scrollbars / overflow on phones and small tablets. */
-img {
-    max-width: 100%;
-    height: auto;
-}
-
 .mainheader {
     left: 20px;
     top: 5px;
@@ -48,8 +40,8 @@ img {
   color: white;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
+  align-items: center; 
+  padding: 0 20px;       
   z-index: 6000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     background-color: rgba(0, 0, 0, 0.25);
@@ -60,6 +52,7 @@ img {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
+    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .top-bar.visible {
@@ -74,12 +67,11 @@ img {
 }
 
 .logo {
-  font-size: clamp(16px, 2vw, 24px);
+  font-size: 24px;
   font-weight: bold;
   flex: 1;
   text-decoration: none;
   color: white;
-  white-space: nowrap;
 }
 
 .nav-toggle {
@@ -116,7 +108,6 @@ img {
   border-radius: 8px;
   font-size: 12px;
   width: fit-content;
-  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -128,6 +119,8 @@ img {
   transition: all 0.3s ease;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  border: 60px;
+
 }
 
 .nav-links a.active {
@@ -173,7 +166,7 @@ img {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: min(260px, 90vw);
+  width: 260px;
   background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -208,7 +201,6 @@ img {
   font-size: 13px;
   font-family: sans-serif;
   resize: vertical;
-  width: 100%;
 }
 
 .dropdown-panel input::placeholder,
@@ -259,7 +251,6 @@ img {
 #home {
     color: white;
     height: 100vh;
-    min-height: 560px;
     padding-top: 60px;
     background-image: url("./images/5.jpg");
     background-size: cover;
@@ -267,7 +258,7 @@ img {
     background-repeat: no-repeat;
 }
 
-#gallery {
+#gallery { 
     background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
     background-size: cover;
     background-position: center;
@@ -289,8 +280,7 @@ img {
     font-size: 13px;
 }
 
-/* Contact card — two-column flex layout: text on the left, map on the right.
-   Wraps to a single column automatically once there isn't room for both. */
+/* Contact card — now a two-column flex layout: text on the left, map on the right */
 .contactme {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -305,11 +295,14 @@ img {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    margin: 30px auto;
+    margin-left: 40px;
+    margin-top: 30px;
+    margin-bottom: 30px;
     display: flex;
     flex-wrap: wrap;
     gap: 32px;
     align-items: stretch;
+    white-space: nowrap;
 }
 
 .contactme.visible {
@@ -319,7 +312,6 @@ img {
 
 .contact-details {
     flex: 1 1 300px;
-    min-width: 0;
 }
 
 .map-embed {
@@ -345,8 +337,6 @@ img {
 
 .contactme p {
     margin-bottom: 10px;
-    overflow-wrap: break-word;
-    word-break: break-word;
 }
 
 .contactme a {
@@ -370,12 +360,13 @@ img {
    SECTION TEXT (headings/description)
    ============================ */
 .content h1 {
-    font-size: clamp(28px, 6vw, 70px);
+    font-size: 70px;
     display: flex;
     flex-direction: column;
     font-weight: bold;
     padding: 10px;
     margin-left: 30px;
+    top: 20px;
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
@@ -389,7 +380,7 @@ img {
 .description {
     position: absolute;
     margin-top: 20px;
-    font-size: clamp(14px, 1.6vw, 20px);
+    font-size: 20px;
     margin-left: 45px;
     opacity: 0;
     transform: translateY(40px);
@@ -404,17 +395,14 @@ img {
   color: white;
   height: auto;
   position: relative;
-  padding-bottom: 40px;
-  overflow: hidden;
 }
 #aboutus {
   padding: 10px;
   color: white;
   text-transform: capitalize;
   max-width: 600px;
-  width: min(90%, 600px);
   margin-left: 35px;
-  font-size: clamp(14px, 1.6vw, 22px);
+  font-size: 22px;
   margin-bottom: 35px ;
       background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -424,6 +412,7 @@ img {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
+    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -434,27 +423,21 @@ img {
 }
 
 #aboutus.visible:hover {
-    transform: translateY(0) scale(1.03);
+    transform: translateY(0) scale(1.1);
     z-index: 1000;
 }
-
-/* These two photos float beside the about text on wide screens. Using
-   right-edge positioning (instead of a fixed left:700px/900px) means
-   they scale with the container instead of sliding off narrower
-   laptop and tablet screens. They're pulled back into normal document
-   flow at the #about tablet breakpoint further down. */
 #imagetop {
-  height: 320px;
-  width: 240px;
+  height: 400px;
+  width: 300px;
+  left: 700px;
+  display: flex;
   position: absolute;
-  right: 6%;
   top: 20px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
-  object-fit: cover;
 }
 
 #imagetop.visible {
@@ -464,22 +447,22 @@ img {
 }
 
 #imagetop.visible:hover {
-  transform: translateY(0) scale(1.08);
+  transform: translateY(0) scale(1.1);
   z-index: 1000;
 }
 
 #imagebottom {
-  height: 320px;
-  width: 240px;
+  height: 400px;
+  width: 300px;
+  left: 900px;
+  display: flex;
   position: absolute;
-  right: -2%;
-  top: 180px;
+  top: 160px;
   border: 1px solid white;
   border-radius: 20px;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
-  object-fit: cover;
 }
 
 #imagebottom.visible {
@@ -489,7 +472,7 @@ img {
 }
 
 #imagebottom.visible:hover {
-  transform: translateY(0) scale(1.08);
+  transform: translateY(0) scale(1.1);
   z-index: 1200;
 }
 /* ============================
@@ -504,6 +487,7 @@ img {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
+    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
     position: absolute;
     margin-top: 17%;
@@ -513,6 +497,7 @@ img {
     color: white;
     text-decoration: none;
     font-size: 11px;
+    text-transform: uppercase;
     z-index: 1000;
 }
 
@@ -539,8 +524,8 @@ img {
     padding: 24px 28px;
     opacity: 0;
     transform: translateY(40px);
+    box-shadow: 2px solid black;
     transition: opacity 0.6s ease, transform 0.6s ease;
-    width: fit-content;
 }
 
 .des2.visible, .des3.visible {
@@ -557,7 +542,7 @@ img {
     margin-top: 10%;
     margin-left: 73px;
     font-family: 'Inter', sans-serif;
-    font-size: clamp(20px, 2.8vw, 32px);
+    font-size: 32px;
     color: white;
     font-weight: 800;
     letter-spacing: -.03em;
@@ -567,6 +552,7 @@ img {
     position: absolute;
     margin-top: 17%;
     margin-left: 45px;
+    font-size: 20px;
     font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -582,8 +568,7 @@ img {
     padding: 20px;
     flex-wrap: wrap;
     margin-top: 0px;
-    border-bottom: 5px solid white;
-    justify-content: center;
+        border-bottom: 5px solid white;
 }
 
 .gallery img {
@@ -595,7 +580,7 @@ img {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-
+    
 }
 
 .gallery img.visible {
@@ -604,7 +589,7 @@ img {
 }
 
 .gallery img:hover {
-    transform: scale(1.3);
+    transform: scale(2.2);
 }
 
 .gallery img.visible:hover {
@@ -616,9 +601,8 @@ img {
     text-align: center;
     margin-top: 30px;
     color: white;
-    font-size: clamp(18px, 3vw, 32px);
     transform: translateY(40px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+        transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .gallery h1.visible {
     opacity: 1;
@@ -632,49 +616,11 @@ img {
 }
 
 /* ============================
-   RESPONSIVE BREAKPOINTS
-   ============================
-   Three tiers instead of two: desktop, a mid tier for tablets and
-   small laptops (this is the range the original CSS left unhandled,
-   where absolute-positioned pixel offsets used to overflow), and a
-   phone tier. */
-
-/* ---- Small laptops / large tablets ---- */
-@media (max-width: 1200px) {
-  #imagetop {
-    width: 200px;
-    height: 260px;
-    right: 4%;
-  }
-  #imagebottom {
-    width: 200px;
-    height: 260px;
-    right: -3%;
-    top: 160px;
-  }
-}
-
-/* ---- Tablets ---- */
+   MOBILE / TABLET RESPONSIVE
+   ============================ */
 @media (max-width: 900px) {
   .content h1 {
-    font-size: clamp(26px, 5vw, 44px);
-  }
-
-  /* The floating photos no longer have room beside the text —
-     drop them into normal flow below the about text instead of
-     letting them overlap it. */
-  #about {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #imagetop,
-  #imagebottom {
-    position: static;
-    width: min(80%, 320px);
-    height: 260px;
-    margin: 0 auto 20px;
+    font-size: 44px;
   }
 }
 
@@ -763,7 +709,7 @@ img {
   }
 
   .content h1 {
-    font-size: clamp(26px, 8vw, 34px);
+    font-size: 34px;
     margin-left: 0;
     padding: 0;
   }
@@ -772,11 +718,13 @@ img {
     position: static;
     margin-left: 0;
     margin-top: 16px;
+    font-size: 16px;
   }
 
   .des2 {
     position: static;
     margin: 20px 0 0;
+    font-size: 26px;
   }
 
   .des3 {
@@ -797,6 +745,7 @@ img {
   }
 
   .gallery h1 {
+    font-size: 24px;
     padding: 10px;
   }
 
@@ -804,19 +753,20 @@ img {
   #contact {
     font-size: 15px;
     padding-left: 0;
-    left: 0;
   }
 
   .contactme {
     flex-direction: column;
     width: 92%;
-    margin: 20px auto;
+    margin-left: 4%;
     padding: 24px 20px;
   }
 
   .contactme p,
   .contactme a {
     font-size: 15px;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .contactme h1 {
@@ -834,6 +784,14 @@ img {
     height: 200px;
   }
 
+  .content h1 {
+    font-size: 28px;
+  }
+
+  .des2 {
+    font-size: 22px;
+  }
+
   #contact {
     font-size: 13px;
   }
@@ -845,14 +803,5 @@ img {
 
   .contactme h1 {
     font-size: 24px;
-  }
-}
-
-/* ---- Landscape phones with short viewport height (avoids a full-height
-       hero section forcing the user to scroll to see the CTA button) ---- */
-@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
-  #home {
-    min-height: auto;
-    padding: 90px 20px 40px;
   }
 }
