@@ -53,6 +53,7 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 0 20px;
   z-index: 6000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -98,6 +99,7 @@ img {
 
 .nav-toggle {
   display: none;
+  flex-shrink: 0;
   background: none;
   border: none;
   color: white;
@@ -834,11 +836,20 @@ img {
   }
 }
 
-@media (max-width: 768px) {
-  /* Nav bar becomes a hamburger menu */
+/* Nav bar becomes a hamburger menu. This has its own, wider breakpoint
+   because the full desktop nav (5 links + Email Us dropdown + logo) runs
+   out of room and starts crowding the logo well before 768px. */
+@media (max-width: 900px) {
   .top-bar {
     padding: 14px 20px;
     height: auto;
+  }
+
+  /* This spacer only exists to balance the desktop layout; once the nav
+     switches to a hamburger it has no sibling to balance and was stealing
+     width that belongs to .logo. */
+  .top-bar::after {
+    content: none;
   }
 
   .nav-toggle {
@@ -847,6 +858,9 @@ img {
 
   .logo {
     font-size: 18px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .nav-links {
@@ -906,7 +920,9 @@ img {
   .dropdown-panel.open {
     transform: none;
   }
+}
 
+@media (max-width: 768px) {
   /* Hero section: switch from absolute-positioned desktop layout to a stacked flow */
   #home {
     height: auto;
