@@ -600,6 +600,19 @@ img {
 /* ============================
    CALL-TO-ACTION BUTTON
    ============================ */
+/* Wraps the primary and secondary hero CTAs so they share one positioning
+   context instead of each computing their own absolute offset. */
+.hero-ctas {
+    position: absolute;
+    bottom: 8vh;
+    right: 6%;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+}
+
 .quotebutton {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
@@ -610,28 +623,63 @@ img {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
-    position: absolute;
-    bottom: 8vh;
-    margin-left: 85%;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: white;
     text-decoration: none;
     font-size: 11px;
-    z-index: 1000;
 }
 
 .quotebutton.visible {
     opacity: 1;
     transform: translateY(0);
-    z-index: 1000;
     animation: pulse-ring 1.5s ease-out infinite;
 }
 
 .quotebutton.visible:hover {
     transform: translateY(0) scale(1.2);
-    z-index: 1000;
     animation-play-state: paused;
+}
+
+/* Scroll-down cue — hints there's more content below the full-height hero.
+   Desktop/tablet only; hidden on phones in the mobile breakpoint below. */
+.scroll-cue {
+    position: absolute;
+    bottom: 3vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900;
+    display: flex;
+    opacity: 0;
+    padding: 10px;
+    text-decoration: none;
+    transition: opacity 0.6s ease;
+}
+
+.scroll-cue.visible {
+    opacity: 0.75;
+    animation: scroll-cue-bounce 2s ease-in-out infinite;
+}
+
+.scroll-cue:hover {
+    opacity: 1;
+}
+
+.scroll-cue-arrow {
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(45deg);
+}
+
+@keyframes scroll-cue-bounce {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        transform: translateX(-50%) translateY(8px);
+    }
 }
 
 @keyframes pulse-ring {
@@ -959,11 +1007,24 @@ img {
     margin: 10px 0 0;
   }
 
-  .quotebutton {
+  .hero-ctas {
     position: static;
-    bottom: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
     margin: 24px 0 0;
+  }
+
+  .quotebutton {
     display: inline-block;
+  }
+
+  /* Scroll cue only makes sense when the hero fills the viewport with
+     little else going on; on phones the stacked content already implies
+     scrolling, so it's just clutter. */
+  .scroll-cue {
+    display: none;
   }
 
   /* Gallery: stack each before/after pair vertically instead of side-by-side */

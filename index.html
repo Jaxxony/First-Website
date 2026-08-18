@@ -46,7 +46,12 @@
   <p class="description">Built Smart. Packed Flat. Made to Last.</p>
   <p class="des2">100%</p>
     <p class="des3">Quality Guarantee</p>
-    <a class="quotebutton" href="#contact">Request A Quote!</a>
+    <div class="hero-ctas">
+      <a class="quotebutton" href="#contact">Request A Quote!</a>
+    </div>
+    <a class="scroll-cue" href="#gallery" aria-label="Scroll to gallery">
+      <span class="scroll-cue-arrow"></span>
+    </a>
 
 
 </div>
@@ -199,7 +204,7 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
   updateActiveLink(); // run once on load too
 </script>
 <script>
-  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .des2, .des3, .quotebutton, .top-bar, .gallery h1, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt');
+  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .des2, .des3, .quotebutton, .scroll-cue, .top-bar, .gallery h1, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt');
 
   // threshold: 0 + a bottom rootMargin (instead of threshold: 0.2) fixes the
   // flicker that happened when only a sliver of an element was on screen:
