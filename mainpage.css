@@ -262,7 +262,7 @@ img {
     height: 100vh;
     min-height: 560px;
     padding-top: 60px;
-    background-image: url("./images/5.jpg");
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.65) 100%), url("./images/5.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -270,7 +270,7 @@ img {
 }
 
 #gallery {
-    background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url("./images/2.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -292,19 +292,19 @@ img {
 }
 #services {
   color: white;
-      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+      background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.65) 100%), url("./images/1.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 #about {
-      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+      background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.65) 100%), url("./images/6.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 #contact {
-      background-image: url("https://images.pexels.com/photos/28170029/pexels-photo-28170029.jpeg");
+      background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.65) 100%), url("./images/3.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
