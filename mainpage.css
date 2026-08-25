@@ -155,8 +155,8 @@ img {
   background-color: rgba(0, 0, 0, 0.3);
   transform: translateY(-1px);
   border-radius: 12px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-links a.active {
@@ -164,8 +164,8 @@ img {
   background-color: rgba(0, 0, 0, 0.3);
   transform: translateY(-1px);
   border-radius: 12px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-links a:hover::after,
@@ -282,6 +282,20 @@ img {
     color: black;
 }
 
+/* Soft glow straddling each section seam so adjacent solid-color/photo
+   sections blend instead of cutting hard into one another. Negative
+   margins pull it 30px into each neighbor while adding zero net height
+   to the page; position:relative makes it paint above both. */
+.section-divider {
+    position: relative;
+    z-index: 10;
+    height: 60px;
+    margin: -30px 0;
+    background: rgba(255, 255, 255, 0.08);
+    filter: blur(30px);
+    pointer-events: none;
+}
+
 /* ============================
    SECTION-SPECIFIC BACKGROUNDS
    ============================ */
@@ -298,11 +312,7 @@ img {
 }
 
 #gallery {
-    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.68) 10%, rgba(0, 0, 0, 0.68) 90%, rgba(0, 0, 0, 0.9) 100% color #0D0D0D);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-color:#0D0D0D;
+    background-color: #0D0D0D;
 }
 
 #contact {
@@ -321,10 +331,7 @@ img {
 }
 #services {
   color: white;
-      background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.32) 16%, rgba(0, 0, 0, 0.28) 84%, rgba(0, 0, 0, 0.88) 100%), url("./images/1.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+  background-color: #14171A;
 }
 #about {
       background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.32) 16%, rgba(0, 0, 0, 0.28) 84%, rgba(0, 0, 0, 0.88) 100%), url("./images/6.jpg");
@@ -333,10 +340,7 @@ img {
     background-repeat: no-repeat;
 }
 #contact {
-      background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.32) 16%, rgba(0, 0, 0, 0.28) 84%, rgba(0, 0, 0, 0.88) 100%), url("./images/3.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-color: #1A1512;
     height: auto;
 }
 #services {
