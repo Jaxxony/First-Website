@@ -433,7 +433,10 @@
   <div id="adminScreen" style="display: none;">
     <div class="topbar">
       <div class="brand">Custom Flatpacks Adelaide <span>Booking Admin</span></div>
-      <button class="btn small" id="logoutBtn">Log Out</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn small" id="notifyBtn">🔔 Enable Notifications</button>
+        <button class="btn small" id="logoutBtn">Log Out</button>
+      </div>
     </div>
 
     <div class="page-wrap">
@@ -499,6 +502,7 @@
               <input type="checkbox" id="hideCancelledToggle" checked>
               Hide cancelled
             </label>
+            <button class="btn small" id="exportCsvBtn">Export CSV</button>
           </div>
         </div>
         <div class="item-list" id="bookingList">
@@ -576,6 +580,45 @@
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
       }, 3500);
+    }
+
+    // Same as showToast, but with a clickable Undo action and a longer window
+    // before it disappears. Used after cancelling a booking, in case it was
+    // a misclick.
+    function showUndoToast(message, onUndo) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.gap = '12px';
+
+      const text = document.createElement('span');
+      text.textContent = message;
+
+      const undoBtn = document.createElement('button');
+      undoBtn.textContent = 'Undo';
+      undoBtn.className = 'btn small';
+      undoBtn.style.padding = '4px 10px';
+
+      toast.appendChild(text);
+      toast.appendChild(undoBtn);
+      toastStack.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+
+      const dismiss = () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      };
+
+      const timer = setTimeout(dismiss, 6000);
+
+      undoBtn.addEventListener('click', async () => {
+        clearTimeout(timer);
+        undoBtn.disabled = true;
+        undoBtn.textContent = '…';
+        await onUndo();
+        dismiss();
+      });
     }
 
     async function copyToClipboard(text, label) {
@@ -687,6 +730,7 @@
       auto_logout_idle: 'Auto-logged out (idle)',
       auto_logout_session_expired: 'Auto-logged out (session expired)',
       booking_cancelled: 'Cancelled a booking',
+      booking_cancel_undone: 'Undid a cancellation',
       booking_completed: 'Marked a job completed',
       slot_blocked: 'Blocked a time',
       slot_unblocked: 'Unblocked a time',
@@ -884,6 +928,104 @@
       el.value = captured.value;
       el.focus();
       try { el.setSelectionRange(captured.selStart, captured.selEnd); } catch {}
+    }
+
+    // ============================
+    // BROWSER NOTIFICATIONS FOR NEW BOOKINGS
+    // ============================
+    const notifyBtn = document.getElementById('notifyBtn');
+
+    function updateNotifyBtnLabel() {
+      if (!('Notification' in window)) {
+        notifyBtn.style.display = 'none';
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        notifyBtn.textContent = '🔔 Notifications On';
+        notifyBtn.disabled = true;
+      } else if (Notification.permission === 'denied') {
+        notifyBtn.textContent = '🔕 Notifications Blocked';
+        notifyBtn.disabled = true;
+      } else {
+        notifyBtn.textContent = '🔔 Enable Notifications';
+        notifyBtn.disabled = false;
+      }
+    }
+    updateNotifyBtnLabel();
+
+    notifyBtn.addEventListener('click', async () => {
+      if (!('Notification' in window)) return;
+      await Notification.requestPermission();
+      updateNotifyBtnLabel();
+    });
+
+    function notifyNewBooking(booking) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      new Notification('New booking request', {
+        body: `${booking.name || 'Someone'} — ${formatDate(booking.date)} at ${booking.time}`
+      });
+    }
+
+    // ============================
+    // CSV EXPORT
+    // ============================
+    function csvEscape(value) {
+      const str = String(value ?? '');
+      if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+      return str;
+    }
+
+    function exportBookingsCsv(bookings) {
+      const headers = ['Date', 'Time', 'Name', 'Email', 'Phone', 'Status', 'Customer Notes', 'Admin Notes'];
+      const rows = bookings.map(b => [
+        b.date, b.time, b.name || '', b.email || '', b.phone || '',
+        b.status || 'active', b.notes || '', b.adminNotes || ''
+      ]);
+      const csv = [headers, ...rows].map(row => row.map(csvEscape).join(',')).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bookings-${todayStr()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      if (allBookings.length === 0) {
+        showToast('No bookings to export yet', 'error');
+        return;
+      }
+      exportBookingsCsv(allBookings);
+      showToast('CSV downloaded', 'success');
+    });
+
+    // ============================
+    // ADD TO GOOGLE CALENDAR
+    // ============================
+    function googleCalendarUrl(booking, durationMinutes = 60) {
+      const startMinutes = timeToMinutes(booking.time);
+      const start = new Date(booking.date + 'T00:00:00');
+      start.setMinutes(startMinutes);
+      const end = new Date(start.getTime() + durationMinutes * 60000);
+      const fmt = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+      const details = [
+        booking.phone ? `Phone: ${booking.phone}` : '',
+        booking.email ? `Email: ${booking.email}` : '',
+        booking.notes ? `Notes: ${booking.notes}` : ''
+      ].filter(Boolean).join('\n');
+
+      const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: `${booking.name || 'Booking'} — Flatpack appointment`,
+        dates: `${fmt(start)}/${fmt(end)}`,
+        details,
+        location: '10-12 Thomas St, Cavan SA 5094'
+      });
+      return `https://calendar.google.com/calendar/render?${params.toString()}`;
     }
 
     // ============================
@@ -1233,10 +1375,19 @@
     function subscribeBookings() {
       bookingList.innerHTML = '<p class="empty-note">Loading…</p>';
 
+      let knownBookingIds = null; // null until the first snapshot, so we never notify for existing bookings on login
+
       unsubscribeBookings = onSnapshot(collection(db, 'bookings'), (snapshot) => {
         allBookings = [];
         snapshot.forEach(docSnap => allBookings.push({ id: docSnap.id, ...docSnap.data() }));
         allBookings.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : timeToMinutes(a.time) - timeToMinutes(b.time));
+
+        if (knownBookingIds !== null) {
+          allBookings.forEach(b => {
+            if (!knownBookingIds.has(b.id) && !b.status) notifyNewBooking(b);
+          });
+        }
+        knownBookingIds = new Set(allBookings.map(b => b.id));
 
         updateStats();
         renderBookings();
@@ -1306,6 +1457,9 @@
         const gmailUrl = booking.email
           ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(booking.email)}&su=${encodeURIComponent(gmailSubject)}&body=${encodeURIComponent(gmailBody)}`
           : null;
+        const telUrl = booking.phone ? `tel:${encodeURIComponent(booking.phone)}` : null;
+        const smsUrl = booking.phone ? `sms:${encodeURIComponent(booking.phone)}` : null;
+        const gcalUrl = googleCalendarUrl(booking);
 
         item.innerHTML = `
           <div class="item-text">
@@ -1323,6 +1477,9 @@
           </div>
           <div class="item-actions">
             ${gmailUrl ? `<a href="${gmailUrl}" target="_blank" rel="noopener" class="action-btn reply">Reply via Gmail</a>` : ''}
+            ${telUrl ? `<a href="${telUrl}" class="action-btn unblock">Call</a>` : ''}
+            ${smsUrl ? `<a href="${smsUrl}" class="action-btn unblock">Text</a>` : ''}
+            <a href="${gcalUrl}" target="_blank" rel="noopener" class="action-btn unblock">Add to Calendar</a>
             ${isCancelled ? '' : '<button class="action-btn unblock complete">Mark Completed</button>'}
             ${isCancelled ? '' : '<button class="action-btn cancel">Cancel Booking</button>'}
           </div>
@@ -1391,8 +1548,23 @@
                 cancelledAt: Timestamp.now()
               });
               if (booking.slotId) await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
-              showToast('Booking cancelled', 'success');
               await logAction('booking_cancelled', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+
+              showUndoToast('Booking cancelled', async () => {
+                try {
+                  await updateDoc(doc(db, 'bookings', booking.id), { status: null });
+                  if (booking.slotId) {
+                    await setDoc(doc(db, 'bookedSlots', booking.slotId), {
+                      date: booking.date, time: booking.time, bookedAt: Timestamp.now()
+                    });
+                  }
+                  showToast('Cancellation undone', 'success');
+                  await logAction('booking_cancel_undone', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+                } catch (err) {
+                  console.error(err);
+                  showToast('Could not undo — that time may have been taken since', 'error');
+                }
+              });
             } catch (err) {
               console.error(err);
               cancelBtn.disabled = false;
