@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Custom Flatpacks Adelaide</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://cdn.jsdelivr.net; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google.com; frame-src https://www.google.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.gstatic.com; base-uri 'none'; form-action 'self';">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-bg-strong: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-dim: rgba(255, 255, 255, 0.55);
+      --text-dimmer: rgba(255, 255, 255, 0.35);
+      --accent-red: #ff8080;
+      --accent-blue: #a9cdff;
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: #0D0D0D;
+      background-image: radial-gradient(circle at 15% 0%, rgba(120, 150, 255, 0.06), transparent 40%),
+                         radial-gradient(circle at 85% 100%, rgba(255, 150, 120, 0.05), transparent 40%);
+      color: white;
+      min-height: 100vh;
+    }
+
+    h1, h2, .brand { font-family: 'Outfit', sans-serif; }
+
+    /* ---- Top bar ---- */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand { font-size: 16px; font-weight: 700; }
+    .brand span { color: var(--text-dim); font-weight: 400; font-family: 'Inter', sans-serif; font-size: 13px; display: block; margin-top: 2px; }
+
+    /* ---- Shared ---- */
+    .page-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 26px;
+    }
+
+    .card input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 11px 13px;
+      color: white;
+      font-size: 14px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .card input::placeholder { color: var(--text-dimmer); }
+    .card input:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .03em;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.24); }
+    .btn:active:not(:disabled) { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.small { padding: 8px 14px; font-size: 12px; }
+
+    .login-error {
+      color: var(--accent-red);
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    /* ---- Login screen ---- */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #loginScreen .card { width: 100%; max-width: 380px; text-align: center; }
+    #loginScreen h1 { font-size: 22px; margin-bottom: 4px; }
+    #loginScreen p.subtitle { color: var(--text-dim); font-size: 13px; margin-bottom: 20px; }
+    #loginScreen form { text-align: left; }
+    #loginScreen .btn { width: 100%; margin-top: 4px; }
+
+    /* ---- Dashboard stats ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+
+    .stat-value { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; line-height: 1.1; }
+    .stat-label { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
+    .stat-sub { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+
+    /* ---- Section ---- */
+    .section {
+      margin-bottom: 26px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h2 { font-size: 16px; }
+    .section-head .count-pill {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-left: 8px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar input[type="search"] {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: white;
+      font-size: 13px;
+      min-width: 200px;
+    }
+    .toolbar input[type="search"]::placeholder { color: var(--text-dimmer); }
+    .toolbar input[type="search"]:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-label input { accent-color: white; cursor: pointer; }
+
+    /* ---- Block-a-time card ---- */
+    .admin-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .admin-input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: white;
+      font-size: 14px;
+      color-scheme: dark;
+    }
+    .admin-input:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+
+    /* ---- List items ---- */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color 0.2s ease;
+    }
+    .list-item:hover { border-color: rgba(255, 255, 255, 0.22); }
+    .list-item.today { border-color: rgba(120, 200, 150, 0.5); }
+    .list-item.past { opacity: 0.4; }
+
+    .item-text { font-size: 14px; line-height: 1.7; }
+    .item-text .when { font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 15px; }
+    .item-text .today-badge {
+      display: inline-block;
+      background: rgba(120, 200, 150, 0.2);
+      color: #a6e8bd;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 1px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .item-text .cancelled-badge {
+      display: inline-block;
+      background: rgba(255, 90, 90, 0.18);
+      color: #ffb3b3;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 1px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .item-text .label { color: var(--text-dim); }
+    .contact-line { display: inline-flex; align-items: center; gap: 6px; }
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .copy-btn:hover { color: white; background: rgba(255, 255, 255, 0.1); }
+
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+      min-width: 140px;
+    }
+
+    .action-btn {
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .action-btn.reply {
+      background: rgba(120, 180, 255, 0.15);
+      border-color: rgba(120, 180, 255, 0.4);
+      color: var(--accent-blue);
+    }
+    .action-btn.reply:hover { background: rgba(120, 180, 255, 0.3); }
+
+    .action-btn.cancel {
+      background: rgba(255, 90, 90, 0.15);
+      border-color: rgba(255, 90, 90, 0.4);
+      color: #ffb3b3;
+    }
+    .action-btn.cancel:hover:not(:disabled) { background: rgba(255, 90, 90, 0.3); }
+
+    .action-btn.unblock {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+    .action-btn.unblock:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); }
+
+    /* ---- Tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 4px;
+      margin-right: 18px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .tab-btn:hover { color: white; }
+    .tab-btn.active { color: white; border-bottom-color: white; }
+    .tab-btn .count-pill { margin-left: 6px; }
+
+    .job-notes-area {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: white;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      min-height: 60px;
+      margin-bottom: 8px;
+    }
+    .job-notes-area:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+
+    .empty-note { color: var(--text-dim); font-size: 14px; padding: 6px 0; }
+
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-action { color: white; }
+    .log-detail { color: var(--text-dim); }
+    .log-when { color: var(--text-dimmer); white-space: nowrap; font-size: 12px; }
+
+    /* ---- Toasts ---- */
+    #toastStack {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background: rgba(20, 20, 20, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      max-width: 320px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(120, 200, 150, 0.5); }
+    .toast.error { border-color: rgba(255, 90, 90, 0.5); }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 640px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .list-item { flex-direction: column; }
+      .item-actions { flex-direction: row; width: 100%; }
+      .item-actions .action-btn { flex: 1; }
+      .topbar { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen">
+    <div class="card">
+      <h1>Admin Login</h1>
+      <p class="subtitle">Custom Flatpacks Adelaide</p>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit" class="btn">Log In</button>
+      </form>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+
+  <div id="adminScreen" style="display: none;">
+    <div class="topbar">
+      <div class="brand">Custom Flatpacks Adelaide <span>Booking Admin</span></div>
+      <button class="btn small" id="logoutBtn">Log Out</button>
+    </div>
+
+    <div class="page-wrap">
+
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="tabActive">Bookings</button>
+        <button class="tab-btn" data-tab="tabCompleted">Completed Jobs <span class="count-pill" id="completedCount">0</span></button>
+      </div>
+
+      <div id="tabActive" class="tab-panel">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="statUpcoming">—</div>
+          <div class="stat-label">Upcoming Bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statNext">—</div>
+          <div class="stat-label">Next Appointment</div>
+          <div class="stat-sub" id="statNextSub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statBlocked">—</div>
+          <div class="stat-label">Blocked Days / Times</div>
+        </div>
+      </div>
+
+      <div class="section card">
+        <div class="section-head">
+          <h2>Block a Time</h2>
+        </div>
+        <p class="empty-note" style="margin-bottom: 12px;">Pick a date and time to mark it unavailable on the public calendar — for days off, breaks, or anything not booked through the site.</p>
+        <div class="admin-row">
+          <input type="date" id="blockDate" class="admin-input">
+          <select id="blockTimeSelect" class="admin-input" disabled>
+            <option value="">Pick a date first</option>
+          </select>
+          <button class="btn small" id="blockBtn" disabled>Block This Time</button>
+          <button class="btn small" id="blockDayBtn" disabled>Block Whole Day</button>
+        </div>
+        <p class="login-error" id="blockError"></p>
+      </div>
+
+      <div class="section card">
+        <div class="section-head">
+          <h2>Blocked Times <span class="count-pill" id="blockedCount">0</span></h2>
+        </div>
+        <div class="item-list" id="blockedList">
+          <p class="empty-note">Loading…</p>
+        </div>
+      </div>
+
+      <div class="section card">
+        <div class="section-head">
+          <h2>Bookings <span class="count-pill" id="bookingsCount">0</span></h2>
+          <div class="toolbar">
+            <input type="search" id="bookingSearch" placeholder="Search name, email or phone…">
+            <label class="toggle-label">
+              <input type="checkbox" id="hidePastToggle" checked>
+              Hide past bookings
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="hideCancelledToggle" checked>
+              Hide cancelled
+            </label>
+          </div>
+        </div>
+        <div class="item-list" id="bookingList">
+          <p class="empty-note">Loading…</p>
+        </div>
+      </div>
+
+      <div class="section card">
+        <div class="section-head">
+          <h2>Recent Activity</h2>
+          <button class="btn small" id="clearActivityBtn">Clear Recent Activity</button>
+        </div>
+        <div id="activityLog">
+          <p class="empty-note">Loading…</p>
+        </div>
+      </div>
+
+      </div>
+
+      <div id="tabCompleted" class="tab-panel" style="display: none;">
+        <div class="section card">
+          <div class="section-head">
+            <h2>Completed Jobs</h2>
+            <div class="toolbar">
+              <input type="search" id="completedSearch" placeholder="Search name, email or phone…">
+            </div>
+          </div>
+          <p class="empty-note" style="margin-bottom: 12px;">Bookings marked complete land here — add photos and job notes for your own records.</p>
+          <div class="item-list" id="completedList">
+            <p class="empty-note">Loading…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toastStack"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc,
+      query, where, orderBy, limit, addDoc, onSnapshot, Timestamp, writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // ---- Same values as in your index.html ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlJNpFeN10xpxOasC9_twk8NDaBYKmm5s",
+      authDomain: "custom-flatpacks.firebaseapp.com",
+      projectId: "custom-flatpacks",
+      storageBucket: "custom-flatpacks.firebasestorage.app",
+      messagingSenderId: "984123576239",
+      appId: "1:984123576239:web:a3406ae91004c991d6295a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ============================
+    // TOASTS
+    // ============================
+    const toastStack = document.getElementById('toastStack');
+    function showToast(message, type = 'default') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      toastStack.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    async function copyToClipboard(text, label) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(`${label} copied`, 'success');
+      } catch {
+        showToast('Could not copy — select and copy manually', 'error');
+      }
+    }
+    window.__copyToClipboard = copyToClipboard; // exposed for inline onclick handlers
+
+    // ============================
+    // LOGIN THROTTLING
+    // ============================
+    const THROTTLE_KEY = 'adminLoginThrottle';
+    const MAX_ATTEMPTS_BEFORE_LOCKOUT = 5;
+
+    function getThrottleState() {
+      try {
+        return JSON.parse(localStorage.getItem(THROTTLE_KEY)) || { attempts: 0, lockoutUntil: 0, lockoutLevel: 0 };
+      } catch {
+        return { attempts: 0, lockoutUntil: 0, lockoutLevel: 0 };
+      }
+    }
+    function setThrottleState(state) { localStorage.setItem(THROTTLE_KEY, JSON.stringify(state)); }
+    function recordFailedLogin() {
+      const state = getThrottleState();
+      state.attempts += 1;
+      if (state.attempts >= MAX_ATTEMPTS_BEFORE_LOCKOUT) {
+        state.lockoutLevel += 1;
+        const lockoutSeconds = 30 * Math.pow(2, state.lockoutLevel - 1);
+        state.lockoutUntil = Date.now() + lockoutSeconds * 1000;
+        state.attempts = 0;
+      }
+      setThrottleState(state);
+    }
+    function clearThrottle() { setThrottleState({ attempts: 0, lockoutUntil: 0, lockoutLevel: 0 }); }
+    function secondsUntilUnlock() {
+      const state = getThrottleState();
+      return Math.max(0, Math.ceil((state.lockoutUntil - Date.now()) / 1000));
+    }
+
+    // ============================
+    // IDLE AUTO-LOGOUT
+    // ============================
+    const IDLE_LIMIT_MS = 15 * 60 * 1000;
+    let idleTimer = null;
+    function resetIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
+      if (auth.currentUser) {
+        idleTimer = setTimeout(async () => {
+          await logAction('auto_logout_idle', 'Idle for 15 minutes');
+          await signOut(auth);
+          showToast('Logged out after 15 minutes of inactivity');
+        }, IDLE_LIMIT_MS);
+      }
+    }
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+    // ============================
+    // MAX SESSION AGE
+    // ============================
+    // Independent of idle time — forces a fresh login every 8 hours even if
+    // the admin panel is being actively used, so a session token can't stay
+    // valid indefinitely.
+    const MAX_SESSION_MS = 8 * 60 * 60 * 1000;
+    let sessionTimer = null;
+    function startSessionTimer(user) {
+      if (sessionTimer) clearTimeout(sessionTimer);
+      const lastSignIn = new Date(user.metadata.lastSignInTime).getTime();
+      const elapsed = Date.now() - lastSignIn;
+      const remaining = MAX_SESSION_MS - elapsed;
+
+      if (remaining <= 0) {
+        signOut(auth);
+        return;
+      }
+      sessionTimer = setTimeout(async () => {
+        await logAction('auto_logout_session_expired', 'Session reached 8-hour limit');
+        await signOut(auth);
+        showToast('Session expired after 8 hours — please log in again');
+      }, remaining);
+    }
+
+    // ============================
+    // AUDIT LOG
+    // ============================
+    async function logAction(action, detail = '') {
+      try {
+        const user = auth.currentUser;
+        await addDoc(collection(db, 'auditLog'), {
+          action,
+          detail,
+          byEmail: user ? user.email : 'unknown',
+          byUid: user ? user.uid : 'unknown',
+          at: Timestamp.now()
+        });
+      } catch (err) {
+        // Logging failures shouldn't block the actual action — just note it
+        console.error('Could not write audit log entry:', err);
+      }
+    }
+
+    const ACTION_LABELS = {
+      login_success: 'Logged in',
+      logout: 'Logged out',
+      auto_logout_idle: 'Auto-logged out (idle)',
+      auto_logout_session_expired: 'Auto-logged out (session expired)',
+      booking_cancelled: 'Cancelled a booking',
+      booking_completed: 'Marked a job completed',
+      slot_blocked: 'Blocked a time',
+      slot_unblocked: 'Unblocked a time',
+      day_blocked: 'Blocked a whole day',
+      day_unblocked: 'Unblocked a whole day',
+      slot_force_removed: 'Force-removed a slot from Blocked Times',
+      completed_job_deleted: 'Deleted a completed job record',
+      activity_log_cleared: 'Cleared the activity log view'
+    };
+
+    let latestActivityEntries = [];
+    let activityLogClearedAt = 0; // ms epoch — entries at/before this are hidden from the view
+
+    function renderActivityLogList() {
+      const activityLog = document.getElementById('activityLog');
+      const visible = latestActivityEntries.filter(e => !e.at || e.at.toMillis() > activityLogClearedAt);
+
+      if (visible.length === 0) {
+        activityLog.innerHTML = '<p class="empty-note">No activity to show.</p>';
+        return;
+      }
+
+      activityLog.innerHTML = '';
+      visible.forEach(entry => {
+        const when = entry.at ? entry.at.toDate().toLocaleString('en-AU', {
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+        }) : '';
+        const row = document.createElement('div');
+        row.className = 'log-item';
+        row.innerHTML = `
+          <div>
+            <span class="log-action">${ACTION_LABELS[entry.action] || entry.action}</span>
+            ${entry.detail ? `<span class="log-detail"> — ${entry.detail}</span>` : ''}
+          </div>
+          <span class="log-when">${when}</span>
+        `;
+        activityLog.appendChild(row);
+      });
+    }
+
+    let unsubscribeActivityLog = null;
+
+    async function subscribeActivityLog() {
+      const activityLog = document.getElementById('activityLog');
+      activityLog.innerHTML = '<p class="empty-note">Loading…</p>';
+
+      // Load the saved clear-cutoff (if any) so it persists across sessions/devices
+      try {
+        const settingsSnap = await getDoc(doc(db, 'adminSettings', 'activityLog'));
+        activityLogClearedAt = settingsSnap.exists() && settingsSnap.data().clearedAt
+          ? settingsSnap.data().clearedAt.toMillis()
+          : 0;
+      } catch (err) {
+        console.error('Could not load activity log clear setting:', err);
+      }
+
+      const q = query(collection(db, 'auditLog'), orderBy('at', 'desc'), limit(25));
+      unsubscribeActivityLog = onSnapshot(q, (snapshot) => {
+        latestActivityEntries = [];
+        snapshot.forEach(docSnap => latestActivityEntries.push(docSnap.data()));
+        renderActivityLogList();
+      }, (err) => {
+        console.error('Activity log listener error:', err);
+        activityLog.innerHTML = '<p class="empty-note">Could not load activity log.</p>';
+      });
+    }
+
+    document.getElementById('clearActivityBtn').addEventListener('click', async () => {
+      if (!confirm('Clear the activity log view? This only hides existing entries from view — nothing is actually deleted, and new activity will still appear.')) return;
+
+      const clearBtn = document.getElementById('clearActivityBtn');
+      clearBtn.disabled = true;
+
+      try {
+        const now = Timestamp.now();
+        await setDoc(doc(db, 'adminSettings', 'activityLog'), {
+          clearedAt: now,
+          clearedBy: auth.currentUser ? auth.currentUser.email : 'unknown'
+        });
+        activityLogClearedAt = now.toMillis();
+        renderActivityLogList();
+        showToast('Activity log view cleared', 'success');
+        await logAction('activity_log_cleared');
+      } catch (err) {
+        console.error(err);
+        showToast('Could not clear the activity log', 'error');
+      } finally {
+        clearBtn.disabled = false;
+      }
+    });
+
+    // ============================
+    // ELEMENTS
+    // ============================
+    const loginScreen = document.getElementById('loginScreen');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const loginSubmitBtn = loginForm.querySelector('button[type="submit"]');
+    const adminScreen = document.getElementById('adminScreen');
+    const bookingList = document.getElementById('bookingList');
+    const blockedList = document.getElementById('blockedList');
+    const bookingsCount = document.getElementById('bookingsCount');
+    const blockedCount = document.getElementById('blockedCount');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const bookingSearch = document.getElementById('bookingSearch');
+    const hidePastToggle = document.getElementById('hidePastToggle');
+    const hideCancelledToggle = document.getElementById('hideCancelledToggle');
+
+    const statUpcoming = document.getElementById('statUpcoming');
+    const statNext = document.getElementById('statNext');
+    const statNextSub = document.getElementById('statNextSub');
+    const statBlocked = document.getElementById('statBlocked');
+
+    const blockDate = document.getElementById('blockDate');
+    const blockTimeSelect = document.getElementById('blockTimeSelect');
+    const blockBtn = document.getElementById('blockBtn');
+    const blockDayBtn = document.getElementById('blockDayBtn');
+    const blockError = document.getElementById('blockError');
+
+    let allBookings = []; // cached in memory so search/filter don't re-hit Firestore
+
+    // ============================
+    // HELPERS
+    // ============================
+    function slotsForDay(dow) {
+      if (dow === 0) return null;
+      if (dow === 6) return ['9:00 AM', '10:00 AM', '11:00 AM'];
+      if (dow === 5) return ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM'];
+      return ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
+    }
+    function slugifyTime(time) { return time.replace(/:/g, '-').replace(/\s+/g, '-'); }
+    function timeToMinutes(timeStr) {
+      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return 0;
+      let [, h, m, period] = match;
+      h = parseInt(h, 10); m = parseInt(m, 10);
+      if (period.toUpperCase() === 'PM' && h !== 12) h += 12;
+      if (period.toUpperCase() === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    }
+    function formatDate(dateStr) {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-AU', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+    function todayStr() {
+      // Build from local date parts, not toISOString() — toISOString() returns
+      // the UTC date, which in Adelaide (UTC+9:30/+10:30) can be a day ahead
+      // or behind the actual local date depending on the time of day. That
+      // mismatch was the "hide past bookings" bug: today's own bookings could
+      // get miscategorised as past (or vice versa) right around midnight.
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // ============================
+    // AUTH
+    // ============================
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+
+      const remaining = secondsUntilUnlock();
+      if (remaining > 0) {
+        loginError.textContent = `Too many failed attempts. Try again in ${remaining}s.`;
+        return;
+      }
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      loginSubmitBtn.disabled = true;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        clearThrottle();
+        await logAction('login_success');
+      } catch (err) {
+        recordFailedLogin();
+        const nowLocked = secondsUntilUnlock();
+        loginError.textContent = nowLocked > 0
+          ? `Too many failed attempts. Try again in ${nowLocked}s.`
+          : 'Login failed — check your email and password.';
+      } finally {
+        loginSubmitBtn.disabled = false;
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await logAction('logout');
+      await signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginScreen.style.display = 'none';
+        adminScreen.style.display = 'block';
+        subscribeBookings();
+        subscribeBlockedTimes();
+        subscribeActivityLog();
+        subscribeCompletedJobs();
+        resetIdleTimer();
+        startSessionTimer(user);
+      } else {
+        loginScreen.style.display = 'flex';
+        adminScreen.style.display = 'none';
+        if (idleTimer) clearTimeout(idleTimer);
+        if (sessionTimer) clearTimeout(sessionTimer);
+        if (unsubscribeBookings) { unsubscribeBookings(); unsubscribeBookings = null; }
+        if (unsubscribeBlockedTimes) { unsubscribeBlockedTimes(); unsubscribeBlockedTimes = null; }
+        if (unsubscribeActivityLog) { unsubscribeActivityLog(); unsubscribeActivityLog = null; }
+        if (unsubscribeCompleted) { unsubscribeCompleted(); unsubscribeCompleted = null; }
+      }
+    });
+
+    // ============================
+    // BLOCK A TIME / WHOLE DAY
+    // ============================
+    blockDate.addEventListener('change', async () => {
+      blockError.textContent = '';
+      blockTimeSelect.innerHTML = '<option value="">Loading…</option>';
+      blockTimeSelect.disabled = true;
+      blockBtn.disabled = true;
+      blockDayBtn.disabled = true;
+
+      const dateStr = blockDate.value;
+      if (!dateStr) {
+        blockTimeSelect.innerHTML = '<option value="">Pick a date first</option>';
+        return;
+      }
+
+      const dow = new Date(dateStr + 'T00:00:00').getDay();
+      const allSlots = slotsForDay(dow);
+
+      if (!allSlots) {
+        blockTimeSelect.innerHTML = '<option value="">Closed that day</option>';
+        return;
+      }
+
+      const q = query(collection(db, 'bookedSlots'), where('date', '==', dateStr));
+      const snapshot = await getDocs(q);
+      const taken = new Set();
+      snapshot.forEach(docSnap => taken.add(docSnap.data().time));
+
+      const available = allSlots.filter(t => !taken.has(t));
+
+      if (available.length > 0) {
+        blockTimeSelect.innerHTML = available.map(t => `<option value="${t}">${t}</option>`).join('');
+        blockTimeSelect.disabled = false;
+        blockBtn.disabled = false;
+        blockDayBtn.disabled = false;
+      } else {
+        blockTimeSelect.innerHTML = '<option value="">All times already taken</option>';
+      }
+    });
+
+    blockBtn.addEventListener('click', async () => {
+      const dateStr = blockDate.value;
+      const time = blockTimeSelect.value;
+      if (!dateStr || !time) return;
+
+      blockBtn.disabled = true;
+      blockBtn.textContent = 'Blocking…';
+      blockError.textContent = '';
+
+      const slotId = `${dateStr}_${slugifyTime(time)}`;
+
+      try {
+        await setDoc(doc(db, 'bookedSlots', slotId), {
+          date: dateStr, time: time, bookedAt: Timestamp.now(), manualBlock: true
+        });
+        showToast(`Blocked ${formatDate(dateStr)} at ${time}`, 'success');
+        await logAction('slot_blocked', `${formatDate(dateStr)} at ${time}`);
+        blockDate.dispatchEvent(new Event('change'));
+      } catch (err) {
+        console.error(err);
+        blockError.textContent = 'Could not block that time — see console for details.';
+        showToast('Could not block that time', 'error');
+      } finally {
+        blockBtn.disabled = false;
+        blockBtn.textContent = 'Block This Time';
+      }
+    });
+
+    blockDayBtn.addEventListener('click', async () => {
+      const dateStr = blockDate.value;
+      if (!dateStr) return;
+
+      const dow = new Date(dateStr + 'T00:00:00').getDay();
+      const allSlots = slotsForDay(dow);
+      if (!allSlots) return;
+
+      blockDayBtn.disabled = true;
+      blockDayBtn.textContent = 'Blocking…';
+      blockError.textContent = '';
+
+      try {
+        const q = query(collection(db, 'bookedSlots'), where('date', '==', dateStr));
+        const snapshot = await getDocs(q);
+        const taken = new Set();
+        snapshot.forEach(docSnap => taken.add(docSnap.data().time));
+
+        const toBlock = allSlots.filter(t => !taken.has(t));
+
+        if (toBlock.length > 0) {
+          const batch = writeBatch(db);
+          toBlock.forEach(time => {
+            const slotId = `${dateStr}_${slugifyTime(time)}`;
+            batch.set(doc(db, 'bookedSlots', slotId), {
+              date: dateStr, time: time, bookedAt: Timestamp.now(),
+              manualBlock: true, wholeDayBlock: true, dayBlockGroup: dateStr
+            });
+          });
+          await batch.commit();
+        }
+
+        showToast(`Blocked whole day: ${formatDate(dateStr)}`, 'success');
+        await logAction('day_blocked', formatDate(dateStr));
+        blockDate.dispatchEvent(new Event('change'));
+      } catch (err) {
+        console.error(err);
+        blockError.textContent = 'Could not block that day — see console for details.';
+        showToast('Could not block that day', 'error');
+      } finally {
+        blockDayBtn.disabled = false;
+        blockDayBtn.textContent = 'Block Whole Day';
+      }
+    });
+
+    // ============================
+    // BLOCKED TIMES LIST (live)
+    // ============================
+    let unsubscribeBlockedTimes = null;
+
+    function subscribeBlockedTimes() {
+      blockedList.innerHTML = '<p class="empty-note">Loading…</p>';
+
+      // Show every bookedSlots doc, not just manually-blocked ones — otherwise
+      // an orphaned or unexpected entry (no matching booking, no manualBlock
+      // flag) is invisible here and impossible to remove from the panel.
+      unsubscribeBlockedTimes = onSnapshot(collection(db, 'bookedSlots'), (snapshot) => {
+        const blocks = [];
+        snapshot.forEach(docSnap => blocks.push({ id: docSnap.id, ...docSnap.data() }));
+        renderBlockedTimes(blocks);
+      }, (err) => {
+        console.error('Blocked times listener error:', err);
+        blockedList.innerHTML = '<p class="empty-note">Could not load blocked times.</p>';
+      });
+    }
+
+    function renderBlockedTimes(blocks) {
+      blockedCount.textContent = blocks.length;
+
+      if (blocks.length === 0) {
+        blockedList.innerHTML = '<p class="empty-note">No blocked or held times.</p>';
+        statBlocked.textContent = '0';
+        return;
+      }
+
+      const dayGroups = new Map();
+      const manualSingles = [];
+      const other = []; // no manualBlock flag — either tied to a live booking, or an orphan
+
+      blocks.forEach(b => {
+        if (b.wholeDayBlock && b.dayBlockGroup) {
+          if (!dayGroups.has(b.dayBlockGroup)) dayGroups.set(b.dayBlockGroup, []);
+          dayGroups.get(b.dayBlockGroup).push(b);
+        } else if (b.manualBlock) {
+          manualSingles.push(b);
+        } else {
+          other.push(b);
+        }
+      });
+
+      statBlocked.textContent = `${dayGroups.size} day${dayGroups.size === 1 ? '' : 's'} / ${manualSingles.length} time${manualSingles.length === 1 ? '' : 's'} / ${other.length} other`;
+
+      manualSingles.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : timeToMinutes(a.time) - timeToMinutes(b.time));
+      other.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : timeToMinutes(a.time) - timeToMinutes(b.time));
+      const sortedDayGroups = [...dayGroups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+      const today = todayStr();
+      blockedList.innerHTML = '';
+
+      sortedDayGroups.forEach(([dateStr, docsForDay]) => {
+        const item = document.createElement('div');
+        item.className = 'list-item' + (dateStr < today ? ' past' : dateStr === today ? ' today' : '');
+
+        item.innerHTML = `
+          <div class="item-text">
+            <div class="when">${formatDate(dateStr)} — whole day blocked${dateStr === today ? '<span class="today-badge">Today</span>' : ''}</div>
+            <div><span class="label">Slots blocked:</span> ${docsForDay.length}</div>
+          </div>
+          <div class="item-actions">
+            <button class="action-btn unblock">Unblock Whole Day</button>
+          </div>
+        `;
+
+        const unblockBtn = item.querySelector('.unblock');
+        unblockBtn.addEventListener('click', async () => {
+          if (!confirm(`Unblock the whole day of ${formatDate(dateStr)}?`)) return;
+          unblockBtn.disabled = true;
+          unblockBtn.textContent = 'Unblocking…';
+          try {
+            const batch = writeBatch(db);
+            docsForDay.forEach(d => batch.delete(doc(db, 'bookedSlots', d.id)));
+            await batch.commit();
+            showToast(`Unblocked ${formatDate(dateStr)}`, 'success');
+            await logAction('day_unblocked', formatDate(dateStr));
+          } catch (err) {
+            console.error(err);
+            unblockBtn.disabled = false;
+            unblockBtn.textContent = 'Unblock Whole Day';
+            showToast('Could not unblock', 'error');
+          }
+        });
+
+        blockedList.appendChild(item);
+      });
+
+      manualSingles.forEach(block => {
+        const item = document.createElement('div');
+        item.className = 'list-item' + (block.date < today ? ' past' : block.date === today ? ' today' : '');
+
+        item.innerHTML = `
+          <div class="item-text">
+            <div class="when">${formatDate(block.date)} at ${block.time}${block.date === today ? '<span class="today-badge">Today</span>' : ''}</div>
+          </div>
+          <div class="item-actions">
+            <button class="action-btn unblock">Unblock</button>
+          </div>
+        `;
+
+        const unblockBtn = item.querySelector('.unblock');
+        unblockBtn.addEventListener('click', async () => {
+          unblockBtn.disabled = true;
+          unblockBtn.textContent = 'Unblocking…';
+          try {
+            await deleteDoc(doc(db, 'bookedSlots', block.id));
+            showToast('Time unblocked', 'success');
+            await logAction('slot_unblocked', `${formatDate(block.date)} at ${block.time}`);
+          } catch (err) {
+            console.error(err);
+            unblockBtn.disabled = false;
+            unblockBtn.textContent = 'Unblock';
+            showToast('Could not unblock', 'error');
+          }
+        });
+
+        blockedList.appendChild(item);
+      });
+
+      other.forEach(block => {
+        const linkedBooking = allBookings.find(b => b.slotId === block.id && b.status !== 'cancelled');
+        const item = document.createElement('div');
+        item.className = 'list-item' + (block.date < today ? ' past' : block.date === today ? ' today' : '');
+
+        const label = linkedBooking
+          ? `<span class="today-badge" style="background: rgba(120,180,255,0.2); color: #a9cdff;">Live booking</span>`
+          : `<span class="cancelled-badge">No matching record</span>`;
+
+        item.innerHTML = `
+          <div class="item-text">
+            <div class="when">${formatDate(block.date)} at ${block.time} ${label}</div>
+            ${linkedBooking ? `<div><span class="label">Booked by:</span> ${linkedBooking.name || 'Unnamed'}</div>` : '<div class="empty-note" style="padding: 0;">No booking record is linked to this slot.</div>'}
+          </div>
+          <div class="item-actions">
+            <button class="action-btn unblock">${linkedBooking ? 'Force Remove' : 'Remove'}</button>
+          </div>
+        `;
+
+        const unblockBtn = item.querySelector('.unblock');
+        unblockBtn.addEventListener('click', async () => {
+          const warning = linkedBooking
+            ? `This time is held by an active booking for ${linkedBooking.name || 'someone'}. Removing it here does NOT cancel that booking — it only frees the slot, which could let someone else book the same time. Use "Cancel Booking" in the Bookings tab instead unless you're sure. Remove anyway?`
+            : `Remove this slot? It has no manualBlock flag and no matching booking record — this frees the time immediately.`;
+          if (!confirm(warning)) return;
+          unblockBtn.disabled = true;
+          unblockBtn.textContent = 'Removing…';
+          try {
+            await deleteDoc(doc(db, 'bookedSlots', block.id));
+            showToast('Slot removed', 'success');
+            await logAction('slot_force_removed', `${formatDate(block.date)} at ${block.time}${linkedBooking ? ' (was linked to a booking)' : ' (orphaned)'}`);
+          } catch (err) {
+            console.error(err);
+            unblockBtn.disabled = false;
+            unblockBtn.textContent = linkedBooking ? 'Force Remove' : 'Remove';
+            showToast('Could not remove', 'error');
+          }
+        });
+
+        blockedList.appendChild(item);
+      });
+    }
+
+    // ============================
+    // BOOKINGS LIST (live)
+    // ============================
+    let unsubscribeBookings = null;
+
+    function subscribeBookings() {
+      bookingList.innerHTML = '<p class="empty-note">Loading…</p>';
+
+      unsubscribeBookings = onSnapshot(collection(db, 'bookings'), (snapshot) => {
+        allBookings = [];
+        snapshot.forEach(docSnap => allBookings.push({ id: docSnap.id, ...docSnap.data() }));
+        allBookings.sort((a, b) => a.date !== b.date ? a.date.localeCompare(b.date) : timeToMinutes(a.time) - timeToMinutes(b.time));
+
+        updateStats();
+        renderBookings();
+      }, (err) => {
+        console.error('Bookings listener error:', err);
+        bookingList.innerHTML = '<p class="empty-note">Could not load bookings.</p>';
+      });
+    }
+
+    function updateStats() {
+      const today = todayStr();
+      const upcoming = allBookings.filter(b => b.date >= today && b.status !== 'cancelled' && b.status !== 'completed');
+      statUpcoming.textContent = upcoming.length;
+
+      if (upcoming.length > 0) {
+        const next = upcoming[0];
+        statNext.textContent = next.time;
+        statNextSub.textContent = `${formatDate(next.date)} — ${next.name || 'Unnamed'}`;
+      } else {
+        statNext.textContent = '—';
+        statNextSub.textContent = 'No upcoming bookings';
+      }
+    }
+
+    function renderBookings() {
+      const searchTerm = bookingSearch.value.trim().toLowerCase();
+      const hidePast = hidePastToggle.checked;
+      const hideCancelled = hideCancelledToggle.checked;
+      const today = todayStr();
+
+      let filtered = allBookings.filter(b => b.status !== 'completed'); // completed jobs live in their own tab
+
+      if (hidePast) filtered = filtered.filter(b => b.date >= today);
+      if (hideCancelled) filtered = filtered.filter(b => b.status !== 'cancelled');
+
+      if (searchTerm) {
+        filtered = filtered.filter(b =>
+          (b.name || '').toLowerCase().includes(searchTerm) ||
+          (b.email || '').toLowerCase().includes(searchTerm) ||
+          (b.phone || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      bookingsCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        bookingList.innerHTML = `<p class="empty-note">${allBookings.length === 0 ? 'No bookings yet.' : 'No bookings match your search/filters.'}</p>`;
+        return;
+      }
+
+      bookingList.innerHTML = '';
+      filtered.forEach(booking => {
+        const item = document.createElement('div');
+        const isCancelled = booking.status === 'cancelled';
+        item.className = 'list-item' + (booking.date < today ? ' past' : booking.date === today ? ' today' : '') + (isCancelled ? ' past' : '');
+
+        const dateDisplay = formatDate(booking.date);
+        const gmailSubject = `Re: Your appointment request — ${dateDisplay} at ${booking.time}`;
+        const gmailBody = `Hi ${booking.name || ''},\n\n`;
+        const gmailUrl = booking.email
+          ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(booking.email)}&su=${encodeURIComponent(gmailSubject)}&body=${encodeURIComponent(gmailBody)}`
+          : null;
+
+        item.innerHTML = `
+          <div class="item-text">
+            <div class="when">${dateDisplay} at ${booking.time}${booking.date === today ? '<span class="today-badge">Today</span>' : ''}${isCancelled ? '<span class="cancelled-badge">Cancelled</span>' : ''}</div>
+            <div><span class="label">Name:</span> ${booking.name || '—'}</div>
+            <div class="contact-line">
+              <span><span class="label">Email:</span> ${booking.email || '—'}</span>
+              ${booking.email ? `<button class="copy-btn" title="Copy email" data-copy="${booking.email}" data-label="Email">⧉</button>` : ''}
+            </div>
+            <div class="contact-line">
+              <span><span class="label">Phone:</span> ${booking.phone || '—'}</span>
+              ${booking.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${booking.phone}" data-label="Phone">⧉</button>` : ''}
+            </div>
+            ${booking.notes ? `<div><span class="label">Notes:</span> ${booking.notes}</div>` : ''}
+          </div>
+          <div class="item-actions">
+            ${gmailUrl ? `<a href="${gmailUrl}" target="_blank" rel="noopener" class="action-btn reply">Reply via Gmail</a>` : ''}
+            ${isCancelled ? '' : '<button class="action-btn unblock complete">Mark Completed</button>'}
+            ${isCancelled ? '' : '<button class="action-btn cancel">Cancel Booking</button>'}
+          </div>
+          <div style="flex-basis: 100%;">
+            <textarea class="job-notes-area admin-notes-area" placeholder="Add a private note about this booking…">${booking.adminNotes || ''}</textarea>
+            <button class="btn small save-admin-notes-btn">Save Note</button>
+          </div>
+        `;
+
+        item.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, btn.dataset.label));
+        });
+
+        const adminNotesArea = item.querySelector('.admin-notes-area');
+        const saveAdminNotesBtn = item.querySelector('.save-admin-notes-btn');
+        saveAdminNotesBtn.addEventListener('click', async () => {
+          saveAdminNotesBtn.disabled = true;
+          saveAdminNotesBtn.textContent = 'Saving…';
+          try {
+            await updateDoc(doc(db, 'bookings', booking.id), {
+              adminNotes: adminNotesArea.value
+            });
+            showToast('Note saved', 'success');
+          } catch (err) {
+            console.error(err);
+            showToast('Could not save note', 'error');
+          } finally {
+            saveAdminNotesBtn.disabled = false;
+            saveAdminNotesBtn.textContent = 'Save Note';
+          }
+        });
+
+        const completeBtn = item.querySelector('.complete');
+        if (completeBtn) {
+          completeBtn.addEventListener('click', async () => {
+            if (!confirm(`Mark the booking for ${booking.name} on ${dateDisplay} at ${booking.time} as completed? It'll move to the Completed Jobs tab.`)) return;
+            completeBtn.disabled = true;
+            completeBtn.textContent = 'Saving…';
+            try {
+              await updateDoc(doc(db, 'bookings', booking.id), {
+                status: 'completed',
+                completedAt: Timestamp.now()
+              });
+              showToast('Booking marked completed', 'success');
+              await logAction('booking_completed', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+            } catch (err) {
+              console.error(err);
+              completeBtn.disabled = false;
+              completeBtn.textContent = 'Mark Completed';
+              showToast('Could not mark as completed', 'error');
+            }
+          });
+        }
+
+        const cancelBtn = item.querySelector('.cancel');
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', async () => {
+            if (!confirm(`Cancel the booking for ${booking.name} on ${dateDisplay} at ${booking.time}?`)) return;
+            cancelBtn.disabled = true;
+            cancelBtn.textContent = 'Cancelling…';
+            try {
+              // Mark cancelled rather than deleting, so it stays visible as
+              // history — only the held time slot is actually removed.
+              await updateDoc(doc(db, 'bookings', booking.id), {
+                status: 'cancelled',
+                cancelledAt: Timestamp.now()
+              });
+              if (booking.slotId) await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
+              showToast('Booking cancelled', 'success');
+              await logAction('booking_cancelled', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+            } catch (err) {
+              console.error(err);
+              cancelBtn.disabled = false;
+              cancelBtn.textContent = 'Cancel Booking';
+              showToast('Could not cancel booking', 'error');
+            }
+          });
+        }
+
+        bookingList.appendChild(item);
+      });
+    }
+
+    bookingSearch.addEventListener('input', renderBookings);
+    hidePastToggle.addEventListener('change', renderBookings);
+    hideCancelledToggle.addEventListener('change', renderBookings);
+
+    // ============================
+    // TABS
+    // ============================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+        document.getElementById(btn.dataset.tab).style.display = 'block';
+      });
+    });
+
+    // ============================
+    // COMPLETED JOBS (live)
+    // ============================
+    const completedList = document.getElementById('completedList');
+    const completedCount = document.getElementById('completedCount');
+    const completedSearch = document.getElementById('completedSearch');
+    let allCompleted = [];
+    let unsubscribeCompleted = null;
+
+    function subscribeCompletedJobs() {
+      completedList.innerHTML = '<p class="empty-note">Loading…</p>';
+      const q = query(collection(db, 'bookings'), where('status', '==', 'completed'));
+      unsubscribeCompleted = onSnapshot(q, (snapshot) => {
+        allCompleted = [];
+        snapshot.forEach(docSnap => allCompleted.push({ id: docSnap.id, ...docSnap.data() }));
+        allCompleted.sort((a, b) => (b.completedAt?.toMillis() || 0) - (a.completedAt?.toMillis() || 0));
+        renderCompletedJobs();
+      }, (err) => {
+        console.error('Completed jobs listener error:', err);
+        completedList.innerHTML = '<p class="empty-note">Could not load completed jobs.</p>';
+      });
+    }
+
+    function renderCompletedJobs() {
+      const searchTerm = completedSearch.value.trim().toLowerCase();
+      let filtered = allCompleted;
+      if (searchTerm) {
+        filtered = filtered.filter(b =>
+          (b.name || '').toLowerCase().includes(searchTerm) ||
+          (b.email || '').toLowerCase().includes(searchTerm) ||
+          (b.phone || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      completedCount.textContent = allCompleted.length;
+
+      if (filtered.length === 0) {
+        completedList.innerHTML = `<p class="empty-note">${allCompleted.length === 0 ? 'No completed jobs yet.' : 'No completed jobs match your search.'}</p>`;
+        return;
+      }
+
+      completedList.innerHTML = '';
+      filtered.forEach(job => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.style.flexDirection = 'column';
+        item.style.alignItems = 'stretch';
+
+        const dateDisplay = formatDate(job.date);
+
+        item.innerHTML = `
+          <div class="item-text" style="margin-bottom: 10px;">
+            <div class="when">${dateDisplay} at ${job.time}</div>
+            <div><span class="label">Name:</span> ${job.name || '—'}</div>
+            <div class="contact-line">
+              <span><span class="label">Email:</span> ${job.email || '—'}</span>
+              ${job.email ? `<button class="copy-btn" title="Copy email" data-copy="${job.email}" data-label="Email">⧉</button>` : ''}
+            </div>
+            <div class="contact-line">
+              <span><span class="label">Phone:</span> ${job.phone || '—'}</span>
+              ${job.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${job.phone}" data-label="Phone">⧉</button>` : ''}
+            </div>
+          </div>
+
+          <textarea class="job-notes-area" placeholder="Job notes — materials used, price, anything worth remembering...">${job.completionNotes || ''}</textarea>
+          <div class="admin-row" style="margin-bottom: 0;">
+            <button class="btn small save-notes-btn">Save Notes</button>
+            <button class="action-btn cancel delete-job-btn">Delete Job Record</button>
+          </div>
+        `;
+
+        item.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, btn.dataset.label));
+        });
+
+        // Save job notes
+        const notesArea = item.querySelector('.job-notes-area');
+        const saveNotesBtn = item.querySelector('.save-notes-btn');
+        saveNotesBtn.addEventListener('click', async () => {
+          saveNotesBtn.disabled = true;
+          saveNotesBtn.textContent = 'Saving…';
+          try {
+            await updateDoc(doc(db, 'bookings', job.id), {
+              completionNotes: notesArea.value
+            });
+            showToast('Job notes saved', 'success');
+          } catch (err) {
+            console.error(err);
+            showToast('Could not save notes', 'error');
+          } finally {
+            saveNotesBtn.disabled = false;
+            saveNotesBtn.textContent = 'Save Notes';
+          }
+        });
+
+        // Permanently delete this completed job record
+        const deleteJobBtn = item.querySelector('.delete-job-btn');
+        deleteJobBtn.addEventListener('click', async () => {
+          if (!confirm(`Permanently delete the job record for ${job.name || 'this booking'} on ${dateDisplay}? This cannot be undone.`)) return;
+          deleteJobBtn.disabled = true;
+          deleteJobBtn.textContent = 'Deleting…';
+          try {
+            await deleteDoc(doc(db, 'bookings', job.id));
+            showToast('Job record deleted', 'success');
+            await logAction('completed_job_deleted', `${job.name || 'Unnamed'} — ${dateDisplay} at ${job.time}`);
+          } catch (err) {
+            console.error(err);
+            deleteJobBtn.disabled = false;
+            deleteJobBtn.textContent = 'Delete Job Record';
+            showToast('Could not delete job record', 'error');
+          }
+        });
+
+        completedList.appendChild(item);
+      });
+    }
+
+    completedSearch.addEventListener('input', renderCompletedJobs);
+  </script>
+</body>
+</html>

@@ -21,6 +21,7 @@
     <a href="#services">Services</a>
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
+    <a href="#booking">Book Now</a>
   </li>
   <li class="nav-dropdown">
     <button class="dropdown-toggle" id="emailToggle" type="button">Email Us ▾</button>
@@ -151,6 +152,47 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
         </div>
     </div>
 </div>
+<div class="section-divider"></div>
+<div id="booking">
+    <div class="booking-card">
+        <h1>Book An Appointment</h1>
+        <p class="booking-intro">Pick a date and time that suits you and we'll get back to you to confirm.</p>
+
+        <div class="calendar">
+            <div class="calendar-header">
+                <button type="button" class="calendar-nav" id="prevMonth" aria-label="Previous month">&#8249;</button>
+                <span id="calendarTitle"></span>
+                <button type="button" class="calendar-nav" id="nextMonth" aria-label="Next month">&#8250;</button>
+            </div>
+            <div class="calendar-daynames">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <div class="time-slots-wrap" id="timeSlotsWrap" hidden>
+            <h2 class="booking-subhead">Choose a time</h2>
+            <div class="time-slots-grid" id="timeSlotsGrid"></div>
+        </div>
+
+        <p class="booking-summary" id="selectedSummary"></p>
+
+        <form id="bookingForm" class="booking-details" hidden>
+            <h2 class="booking-subhead">Your Details</h2>
+            <div class="booking-field-row">
+                <input type="text" id="bookingName" placeholder="Full Name" required>
+                <input type="email" id="bookingEmail" placeholder="Email" required>
+            </div>
+            <div class="booking-field-row">
+                <input type="tel" id="bookingPhone" placeholder="Phone" required>
+            </div>
+            <textarea id="bookingNotes" placeholder="Tell us about your project (optional)" rows="4"></textarea>
+            <button type="submit" class="booking-submit" id="bookingSubmitBtn">Confirm Booking Request</button>
+            <p class="booking-confirmation" id="bookingConfirmation" hidden>Thanks! Your appointment request has been sent — we'll be in touch to confirm.</p>
+            <p class="booking-error" id="bookingError" hidden></p>
+        </form>
+    </div>
+</div>
 
 
 
@@ -166,7 +208,7 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
 
 
 <script>
-  const sections = document.querySelectorAll('#home, #gallery, #services, #about, #contact');
+  const sections = document.querySelectorAll('#home, #gallery, #services, #about, #contact, #booking');
   const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
 
   function updateActiveLink() {
@@ -192,7 +234,7 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
   updateActiveLink(); // run once on load too
 </script>
 <script>
-  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .des2, .des3, .quotebutton, .scroll-cue, .top-bar, .gallery h1, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt');
+  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .des2, .des3, .quotebutton, .scroll-cue, .top-bar, .gallery h1, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt, .booking-card');
 
   // threshold: 0 + a bottom rootMargin (instead of threshold: 0.2) fixes the
   // flicker that happened when only a sliver of an element was on screen:
@@ -288,6 +330,304 @@ Whether you're renovating your kitchen, updating your cabinetry or creating a co
     emailPanel.classList.remove('open');
     emailForm.reset();
   });
+</script>
+<!-- EmailJS: sends the confirmation email straight from the browser, no server needed -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script type="module">
+  // ============================
+  // BOOKING CALENDAR (Firebase + EmailJS)
+  // ============================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, getDocs, query, where,
+    runTransaction, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // ---- FILL THESE IN with the values from your Firebase project settings ----
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlJNpFeN10xpxOasC9_twk8NDaBYKmm5s",
+    authDomain: "custom-flatpacks.firebaseapp.com",
+    projectId: "custom-flatpacks",
+    storageBucket: "custom-flatpacks.firebasestorage.app",
+    messagingSenderId: "984123576239",
+    appId: "1:984123576239:web:a3406ae91004c991d6295a"
+  };
+
+  // ---- FILL THESE IN with the values from your EmailJS account ----
+  const EMAILJS_PUBLIC_KEY = "74ClLXqEm__7P8phB";
+  const EMAILJS_SERVICE_ID = "service_9j7lzjp";
+  const EMAILJS_TEMPLATE_ID = "template_rrkhns3";
+  // -----------------------------------------------------------------------
+
+  const app = initializeApp(firebaseConfig);
+
+  const db = getFirestore(app);
+  emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY,
+    blockHeadless: true, // reject requests from headless/automated browsers
+    limitRate: {
+      id: 'booking-form',
+      throttle: 10000 // one send per 10 seconds per visitor
+    }
+  });
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const calendarTitle = document.getElementById('calendarTitle');
+  const calendarGrid = document.getElementById('calendarGrid');
+  const prevMonthBtn = document.getElementById('prevMonth');
+  const nextMonthBtn = document.getElementById('nextMonth');
+  const timeSlotsWrap = document.getElementById('timeSlotsWrap');
+  const timeSlotsGrid = document.getElementById('timeSlotsGrid');
+  const selectedSummary = document.getElementById('selectedSummary');
+  const bookingForm = document.getElementById('bookingForm');
+  const bookingSubmitBtn = document.getElementById('bookingSubmitBtn');
+  const bookingConfirmation = document.getElementById('bookingConfirmation');
+  const bookingError = document.getElementById('bookingError');
+
+  // Business hours, matching the "Opening Hours" listed in the contact card.
+  // 0 = Sunday ... 6 = Saturday
+  function slotsForDay(dow) {
+    if (dow === 0) return null; // Closed
+    if (dow === 6) return ['9:00 AM', '10:00 AM', '11:00 AM']; // Saturday: by appointment, limited slots
+    if (dow === 5) return ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM']; // Friday to 4pm
+    return ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM']; // Mon-Thu to 5pm
+  }
+
+  function toISODate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // Turns "9:00 AM" into "9-00-AM" so it's safe to use as part of a Firestore doc ID
+  function slugifyTime(time) {
+    return time.replace(/:/g, '-').replace(/\s+/g, '-');
+  }
+
+  let viewDate = new Date();
+  viewDate.setDate(1);
+
+  let selectedDate = null;
+  let selectedTime = null;
+  let takenTimesForSelectedDate = new Set();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  function renderCalendar() {
+    calendarTitle.textContent = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+    calendarGrid.innerHTML = '';
+
+    const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+
+    for (let i = 0; i < startOffset; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'day-cell empty';
+      calendarGrid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
+      const dow = cellDate.getDay();
+      const isPast = cellDate < today;
+      const isClosed = dow === 0;
+
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'day-cell';
+      cell.textContent = d;
+
+      if (isPast || isClosed) {
+        cell.classList.add('disabled');
+        cell.disabled = true;
+      } else {
+        cell.addEventListener('click', () => selectDate(cellDate, cell));
+      }
+
+      if (cellDate.getTime() === today.getTime()) {
+        cell.classList.add('today');
+      }
+
+      if (selectedDate && cellDate.getTime() === selectedDate.getTime()) {
+        cell.classList.add('selected');
+      }
+
+      calendarGrid.appendChild(cell);
+    }
+  }
+
+  async function selectDate(date, cellEl) {
+    selectedDate = date;
+    selectedTime = null;
+
+    calendarGrid.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+    cellEl.classList.add('selected');
+
+    bookingForm.hidden = true;
+    bookingConfirmation.hidden = true;
+    bookingError.hidden = true;
+    updateSummary('Checking availability…');
+
+    await loadTakenSlots(date);
+    renderTimeSlots();
+    updateSummary();
+  }
+
+  // Reads Firestore for any bookedSlots docs matching this date
+  async function loadTakenSlots(date) {
+    takenTimesForSelectedDate = new Set();
+    try {
+      const dateStr = toISODate(date);
+      const q = query(collection(db, 'bookedSlots'), where('date', '==', dateStr));
+      const snapshot = await getDocs(q);
+      snapshot.forEach(docSnap => takenTimesForSelectedDate.add(docSnap.data().time));
+    } catch (err) {
+      console.error('Could not load availability:', err);
+    }
+  }
+
+  function renderTimeSlots() {
+    timeSlotsGrid.innerHTML = '';
+    const dow = selectedDate.getDay();
+    const slots = slotsForDay(dow);
+
+    if (!slots) {
+      timeSlotsWrap.hidden = true;
+      return;
+    }
+
+    slots.forEach(time => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'time-slot';
+      btn.textContent = time;
+
+      if (takenTimesForSelectedDate.has(time)) {
+        btn.classList.add('taken');
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', () => selectTime(time, btn));
+      }
+
+      timeSlotsGrid.appendChild(btn);
+    });
+
+    timeSlotsWrap.hidden = false;
+  }
+
+  function selectTime(time, btnEl) {
+    selectedTime = time;
+    timeSlotsGrid.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
+    btnEl.classList.add('selected');
+    bookingForm.hidden = false;
+    bookingConfirmation.hidden = true;
+    bookingError.hidden = true;
+    updateSummary();
+  }
+
+  function updateSummary(overrideText) {
+    if (overrideText) {
+      selectedSummary.textContent = overrideText;
+      return;
+    }
+    if (!selectedDate) {
+      selectedSummary.textContent = '';
+      return;
+    }
+    const dateStr = selectedDate.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    selectedSummary.textContent = selectedTime
+      ? `Selected: ${dateStr} at ${selectedTime}`
+      : `Selected date: ${dateStr} — now choose a time above`;
+  }
+
+  prevMonthBtn.addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  nextMonthBtn.addEventListener('click', () => {
+    viewDate.setMonth(viewDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  bookingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!selectedDate || !selectedTime) return;
+
+    bookingError.hidden = true;
+    bookingSubmitBtn.disabled = true;
+    bookingSubmitBtn.textContent = 'Booking…';
+
+    const name = document.getElementById('bookingName').value;
+    const email = document.getElementById('bookingEmail').value;
+    const phone = document.getElementById('bookingPhone').value;
+    const notes = document.getElementById('bookingNotes').value;
+
+    const dateStr = toISODate(selectedDate);
+    const dateDisplay = selectedDate.toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const slotId = `${dateStr}_${slugifyTime(selectedTime)}`;
+
+    try {
+      // Transaction: fails if someone else grabbed this exact slot first,
+      // so two people can't double-book the same time.
+      await runTransaction(db, async (transaction) => {
+        const slotRef = doc(db, 'bookedSlots', slotId);
+        const slotSnap = await transaction.get(slotRef);
+        if (slotSnap.exists()) {
+          throw new Error('SLOT_TAKEN');
+        }
+        transaction.set(slotRef, {
+          date: dateStr,
+          time: selectedTime,
+          bookedAt: Timestamp.now()
+        });
+
+        const bookingRef = doc(collection(db, 'bookings'));
+        transaction.set(bookingRef, {
+          date: dateStr,
+          time: selectedTime,
+          slotId: slotId,
+          name, email, phone, notes,
+          createdAt: Timestamp.now()
+        });
+      });
+
+      // Storage succeeded — now send the confirmation email
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        from_name: name,
+        from_email: email,
+        phone: phone,
+        booking_date: dateDisplay,
+        booking_time: selectedTime,
+        notes: notes || '—'
+      });
+
+      bookingForm.hidden = true;
+      timeSlotsWrap.hidden = true;
+      bookingConfirmation.hidden = false;
+
+    } catch (err) {
+      if (err.message === 'SLOT_TAKEN') {
+        bookingError.textContent = 'Sorry, that time was just booked by someone else — please pick another.';
+        await loadTakenSlots(selectedDate);
+        renderTimeSlots();
+      } else {
+        console.error(err);
+        bookingError.textContent = 'Something went wrong sending your request — please call us instead.';
+      }
+      bookingError.hidden = false;
+    } finally {
+      bookingSubmitBtn.disabled = false;
+      bookingSubmitBtn.textContent = 'Confirm Booking Request';
+    }
+  });
+
+  renderCalendar();
 </script>
 </body>
 </html>

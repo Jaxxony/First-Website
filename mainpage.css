@@ -348,6 +348,12 @@ img {
   height: auto;
   padding-bottom: 10px;
 }
+#booking {
+    color: white;
+    height: auto;
+    padding: 60px 20px 40px;
+    background-color: #14171A;
+}
 /* Contact card — two-column flex layout: text on the left, map on the right.
    Wraps to a single column automatically once there isn't room for both. */
 .contactme {
@@ -807,6 +813,286 @@ img {
 }
 
 /* ============================
+   BOOKING CALENDAR
+   ============================ */
+.booking-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 1000px;
+    color: white;
+    margin: 16px auto 24px;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.booking-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.booking-card h1 {
+    font-size: clamp(22px, 3.5vw, 32px);
+    margin-bottom: 8px;
+    padding: 0;
+    margin-left: 0;
+    opacity: 1;
+    transform: none;
+}
+
+.booking-intro {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 20px;
+}
+
+.booking-subhead {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 20px 0 12px;
+}
+
+/* Calendar */
+.calendar {
+    max-width: 380px;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+}
+
+.calendar-nav {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: white;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.calendar-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.calendar-daynames {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 6px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.day-cell.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.day-cell:not(.disabled):not(.empty):hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.day-cell.disabled {
+    color: rgba(255, 255, 255, 0.25);
+    cursor: not-allowed;
+}
+
+.day-cell.today {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.day-cell.selected {
+    background: white;
+    color: #0D0D0D;
+    font-weight: 700;
+}
+
+/* Time slots */
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    max-width: 640px;
+}
+
+.time-slot {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: white;
+    padding: 10px 8px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.time-slot:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.03);
+}
+
+.time-slot.selected {
+    background: white;
+    color: #0D0D0D;
+    font-weight: 700;
+    border-color: white;
+}
+
+.no-slots-note {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.time-slot.taken {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.3);
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+.time-slot.taken:hover {
+    background: rgba(255, 255, 255, 0.03);
+    transform: none;
+}
+
+.booking-error {
+    font-size: 13px;
+    color: #ff8080;
+    margin-top: 8px;
+}
+
+.booking-summary {
+    font-size: 14px;
+    margin-top: 16px;
+    color: rgba(255, 255, 255, 0.85);
+    min-height: 20px;
+}
+
+/* Booking details form */
+.booking-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+    margin-top: 8px;
+}
+
+.booking-field-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.booking-field-row input {
+    flex: 1 1 200px;
+}
+
+.booking-details input,
+.booking-details textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: white;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+    width: 100%;
+}
+
+.booking-details input::placeholder,
+.booking-details textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.booking-details input:focus,
+.booking-details textarea:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.booking-submit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 13px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    align-self: flex-start;
+    font-family: 'Inter', sans-serif;
+}
+
+.booking-submit:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.booking-confirmation {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+    .calendar {
+        max-width: 100%;
+    }
+    .booking-card {
+        width: 92%;
+        padding: 20px;
+        margin: 16px auto 20px;
+    }
+    .time-slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    }
+}
+
+/* ============================
    RESPONSIVE BREAKPOINTS
    ============================
    Three tiers: desktop, a mid tier for tablets and small laptops
@@ -1031,6 +1317,12 @@ img {
 
   .map-embed {
     min-height: 250px;
+  }
+
+  .booking-card {
+    width: 92%;
+    margin: 12px auto 20px;
+    padding: 24px 20px;
   }
 }
 
