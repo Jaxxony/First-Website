@@ -41,6 +41,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
       padding: 18px 28px;
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(10px);
@@ -51,8 +52,10 @@
       z-index: 100;
     }
 
-    .brand { font-size: 16px; font-weight: 700; }
+    .brand { font-size: 16px; font-weight: 700; flex: 0 0 auto; }
     .brand span { color: var(--text-dim); font-weight: 400; font-family: 'Inter', sans-serif; font-size: 13px; display: block; margin-top: 2px; }
+
+    .topbar-actions { flex: 0 0 auto; display: flex; gap: 8px; }
 
     /* ---- Shared ---- */
     .page-wrap {
@@ -348,20 +351,17 @@
     .tab-btn.active { color: white; border-bottom-color: white; }
     .tab-btn .count-pill { margin-left: 6px; }
 
-    /* ---- Quick-jump section nav ---- */
+    /* ---- Quick-jump section nav (now lives in the top bar) ---- */
     .jump-nav {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-      position: sticky;
-      top: 66px;
-      z-index: 50;
-      background: rgba(13, 13, 13, 0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 8px 0;
+      flex: 1 1 auto;
+      justify-content: center;
+      overflow-x: auto;
+      min-width: 0;
+      scrollbar-width: none;
     }
+    .jump-nav::-webkit-scrollbar { display: none; }
     .jump-link {
       display: inline-flex;
       align-items: center;
@@ -373,6 +373,7 @@
       font-size: 12px;
       color: var(--text-dim);
       text-decoration: none;
+      white-space: nowrap;
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
@@ -484,7 +485,13 @@
   <div id="adminScreen" style="display: none;">
     <div class="topbar">
       <div class="brand">Custom Flatpacks Adelaide <span>Booking Admin</span></div>
-      <div style="display: flex; gap: 8px;">
+      <nav class="jump-nav">
+        <a href="#section-block" class="jump-link">🗓️ Block a Time</a>
+        <a href="#section-blocked" class="jump-link">🚫 Blocked Times</a>
+        <a href="#section-bookings" class="jump-link">📖 Bookings</a>
+        <a href="#section-activity" class="jump-link">📜 Activity</a>
+      </nav>
+      <div class="topbar-actions">
         <button class="btn small" id="notifyBtn">🔔 Enable Notifications</button>
         <button class="btn small" id="logoutBtn">Log Out</button>
       </div>
@@ -498,13 +505,6 @@
       </div>
 
       <div id="tabActive" class="tab-panel">
-
-      <div class="jump-nav">
-        <a href="#section-block" class="jump-link">🗓️ Block a Time</a>
-        <a href="#section-blocked" class="jump-link">🚫 Blocked Times</a>
-        <a href="#section-bookings" class="jump-link">📖 Bookings</a>
-        <a href="#section-activity" class="jump-link">📜 Activity</a>
-      </div>
 
       <div class="stats-row">
         <div class="stat-card accent-blue">
@@ -1669,13 +1669,21 @@
     // ============================
     // TABS
     // ============================
+    function activateTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = p.id === tabId ? 'block' : 'none');
+    }
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-        document.getElementById(btn.dataset.tab).style.display = 'block';
-      });
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+    });
+
+    // The jump-nav sections all live inside the "Bookings" tab panel — if
+    // that panel is hidden (because Completed Jobs is currently open), the
+    // browser can't scroll to a target it isn't rendering. Switch tabs first
+    // so the anchor scroll that follows actually has something to land on.
+    document.querySelectorAll('.jump-link').forEach(link => {
+      link.addEventListener('click', () => activateTab('tabActive'));
     });
 
     // ============================
