@@ -267,6 +267,18 @@
       margin-left: 8px;
       vertical-align: middle;
     }
+    .item-text .confirmed-badge {
+      display: inline-block;
+      background: rgba(120, 180, 255, 0.18);
+      color: var(--accent-blue);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 1px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
     .item-text .label { color: var(--text-dim); }
     .contact-line { display: inline-flex; align-items: center; gap: 6px; }
     .copy-btn {
@@ -501,6 +513,7 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="tabActive">Bookings</button>
+        <button class="tab-btn" data-tab="tabConfirmed">Confirmed <span class="count-pill" id="confirmedCount">0</span></button>
         <button class="tab-btn" data-tab="tabCompleted">Completed Jobs <span class="count-pill" id="completedCount">0</span></button>
       </div>
 
@@ -578,6 +591,21 @@
         </div>
       </div>
 
+      </div>
+
+      <div id="tabConfirmed" class="tab-panel" style="display: none;">
+        <div class="section card">
+          <div class="section-head">
+            <h2><span class="section-icon">✔️</span> Confirmed Bookings</h2>
+            <div class="toolbar">
+              <input type="search" id="confirmedSearch" placeholder="Search name, email or phone…">
+            </div>
+          </div>
+          <p class="empty-note" style="margin-bottom: 12px;">Bookings you've confirmed with the customer — same actions as the main list, just kept separate from ones still awaiting confirmation.</p>
+          <div class="item-list" id="confirmedList">
+            <p class="empty-note">Loading…</p>
+          </div>
+        </div>
       </div>
 
       <div id="tabCompleted" class="tab-panel" style="display: none;">
@@ -789,6 +817,8 @@
       auto_logout_session_expired: 'Auto-logged out (session expired)',
       booking_cancelled: 'Cancelled a booking',
       booking_cancel_undone: 'Undid a cancellation',
+      booking_confirmed: 'Confirmed a booking',
+      booking_unconfirmed: 'Unconfirmed a booking',
       booking_completed: 'Marked a job completed',
       slot_blocked: 'Blocked a time',
       slot_unblocked: 'Unblocked a time',
@@ -896,6 +926,9 @@
     const bookingSearch = document.getElementById('bookingSearch');
     const hidePastToggle = document.getElementById('hidePastToggle');
     const hideCancelledToggle = document.getElementById('hideCancelledToggle');
+    const confirmedList = document.getElementById('confirmedList');
+    const confirmedCount = document.getElementById('confirmedCount');
+    const confirmedSearch = document.getElementById('confirmedSearch');
 
     const statUpcoming = document.getElementById('statUpcoming');
     const statNext = document.getElementById('statNext');
@@ -1473,6 +1506,7 @@
 
         updateStats();
         renderBookings();
+        renderConfirmedBookings();
         // The Blocked Times "Live booking" vs "No matching record" labels
         // depend on allBookings — refresh that list too so it can't show a
         // stale label between when a booking changes and when bookedSlots
@@ -1499,13 +1533,189 @@
       }
     }
 
+    // Builds one booking card — used by both the main Bookings list and the
+    // Confirmed tab, so Confirm/Complete/Cancel/notes behave identically in
+    // both places rather than being maintained twice.
+    function buildBookingItem(booking, today) {
+      const item = document.createElement('div');
+      const isCancelled = booking.status === 'cancelled';
+      const isConfirmed = booking.status === 'confirmed';
+      item.className = 'list-item' + (booking.date < today ? ' past' : booking.date === today ? ' today' : '') + (isCancelled ? ' past' : '');
+
+      const dateDisplay = formatDate(booking.date);
+      const gmailSubject = `Re: Your appointment request — ${dateDisplay} at ${booking.time}`;
+      const gmailBody = `Hi ${booking.name || ''},\n\n`;
+      const gmailUrl = booking.email
+        ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(booking.email)}&su=${encodeURIComponent(gmailSubject)}&body=${encodeURIComponent(gmailBody)}`
+        : null;
+      const telUrl = booking.phone ? `tel:${encodeURIComponent(booking.phone)}` : null;
+      const smsUrl = booking.phone ? `sms:${encodeURIComponent(booking.phone)}` : null;
+      const gcalUrl = googleCalendarUrl(booking);
+
+      item.innerHTML = `
+        <div class="item-text">
+          <div class="when">${dateDisplay} at ${escapeHtml(booking.time)}${booking.date === today ? '<span class="today-badge">Today</span>' : ''}${isConfirmed ? '<span class="confirmed-badge">Confirmed</span>' : ''}${isCancelled ? '<span class="cancelled-badge">Cancelled</span>' : ''}</div>
+          <div><span class="label">Name:</span> ${escapeHtml(booking.name) || '—'}</div>
+          <div class="contact-line">
+            <span><span class="label">Email:</span> ${escapeHtml(booking.email) || '—'}</span>
+            ${booking.email ? `<button class="copy-btn" title="Copy email" data-copy="${escapeHtml(booking.email)}" data-label="Email">⧉</button>` : ''}
+          </div>
+          <div class="contact-line">
+            <span><span class="label">Phone:</span> ${escapeHtml(booking.phone) || '—'}</span>
+            ${booking.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${escapeHtml(booking.phone)}" data-label="Phone">⧉</button>` : ''}
+          </div>
+          ${booking.notes ? `<div><span class="label">Notes:</span> ${escapeHtml(booking.notes)}</div>` : ''}
+        </div>
+        <div class="item-actions">
+          ${gmailUrl ? `<a href="${gmailUrl}" target="_blank" rel="noopener" class="action-btn reply">Reply via Gmail</a>` : ''}
+          ${telUrl ? `<a href="${telUrl}" class="action-btn unblock">Call</a>` : ''}
+          ${smsUrl ? `<a href="${smsUrl}" class="action-btn unblock">Text</a>` : ''}
+          <a href="${gcalUrl}" target="_blank" rel="noopener" class="action-btn unblock">Add to Calendar</a>
+          ${isCancelled ? '' : isConfirmed ? '<button class="action-btn unblock unconfirm">Unconfirm</button>' : '<button class="action-btn unblock confirm">Confirm Booking</button>'}
+          ${isCancelled ? '' : '<button class="action-btn unblock complete">Mark Completed</button>'}
+          ${isCancelled ? '' : '<button class="action-btn cancel">Cancel Booking</button>'}
+        </div>
+        <div style="flex-basis: 100%;">
+          <textarea class="job-notes-area admin-notes-area" data-booking-id="${booking.id}" placeholder="Add a private note about this booking…">${escapeHtml(booking.adminNotes)}</textarea>
+          <button class="btn small save-admin-notes-btn">Save Note</button>
+        </div>
+      `;
+
+      item.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, btn.dataset.label));
+      });
+
+      const adminNotesArea = item.querySelector('.admin-notes-area');
+      const saveAdminNotesBtn = item.querySelector('.save-admin-notes-btn');
+      saveAdminNotesBtn.addEventListener('click', async () => {
+        saveAdminNotesBtn.disabled = true;
+        saveAdminNotesBtn.textContent = 'Saving…';
+        try {
+          await updateDoc(doc(db, 'bookings', booking.id), {
+            adminNotes: adminNotesArea.value
+          });
+          showToast('Note saved', 'success');
+        } catch (err) {
+          console.error(err);
+          showToast('Could not save note', 'error');
+        } finally {
+          saveAdminNotesBtn.disabled = false;
+          saveAdminNotesBtn.textContent = 'Save Note';
+        }
+      });
+
+      const confirmBtn = item.querySelector('.confirm');
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Saving…';
+          try {
+            await updateDoc(doc(db, 'bookings', booking.id), {
+              status: 'confirmed',
+              confirmedAt: Timestamp.now()
+            });
+            showToast('Booking confirmed', 'success');
+            await logAction('booking_confirmed', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+          } catch (err) {
+            console.error(err);
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm Booking';
+            showToast('Could not confirm booking', 'error');
+          }
+        });
+      }
+
+      const unconfirmBtn = item.querySelector('.unconfirm');
+      if (unconfirmBtn) {
+        unconfirmBtn.addEventListener('click', async () => {
+          unconfirmBtn.disabled = true;
+          unconfirmBtn.textContent = 'Saving…';
+          try {
+            await updateDoc(doc(db, 'bookings', booking.id), { status: null });
+            showToast('Booking unconfirmed', 'success');
+            await logAction('booking_unconfirmed', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+          } catch (err) {
+            console.error(err);
+            unconfirmBtn.disabled = false;
+            unconfirmBtn.textContent = 'Unconfirm';
+            showToast('Could not unconfirm booking', 'error');
+          }
+        });
+      }
+
+      const completeBtn = item.querySelector('.complete');
+      if (completeBtn) {
+        completeBtn.addEventListener('click', async () => {
+          if (!confirm(`Mark the booking for ${booking.name} on ${dateDisplay} at ${booking.time} as completed? It'll move to the Completed Jobs tab.`)) return;
+          completeBtn.disabled = true;
+          completeBtn.textContent = 'Saving…';
+          try {
+            await updateDoc(doc(db, 'bookings', booking.id), {
+              status: 'completed',
+              completedAt: Timestamp.now()
+            });
+            showToast('Booking marked completed', 'success');
+            await logAction('booking_completed', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+          } catch (err) {
+            console.error(err);
+            completeBtn.disabled = false;
+            completeBtn.textContent = 'Mark Completed';
+            showToast('Could not mark as completed', 'error');
+          }
+        });
+      }
+
+      const cancelBtn = item.querySelector('.cancel');
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', async () => {
+          if (!confirm(`Cancel the booking for ${booking.name} on ${dateDisplay} at ${booking.time}?`)) return;
+          cancelBtn.disabled = true;
+          cancelBtn.textContent = 'Cancelling…';
+          try {
+            // Mark cancelled rather than deleting, so it stays visible as
+            // history — only the held time slot is actually removed.
+            await updateDoc(doc(db, 'bookings', booking.id), {
+              status: 'cancelled',
+              cancelledAt: Timestamp.now()
+            });
+            if (booking.slotId) await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
+            await logAction('booking_cancelled', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+
+            showUndoToast('Booking cancelled', async () => {
+              try {
+                await updateDoc(doc(db, 'bookings', booking.id), { status: null });
+                if (booking.slotId) {
+                  await setDoc(doc(db, 'bookedSlots', booking.slotId), {
+                    date: booking.date, time: booking.time, bookedAt: Timestamp.now()
+                  });
+                }
+                showToast('Cancellation undone', 'success');
+                await logAction('booking_cancel_undone', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
+              } catch (err) {
+                console.error(err);
+                showToast('Could not undo — that time may have been taken since', 'error');
+              }
+            });
+          } catch (err) {
+            console.error(err);
+            cancelBtn.disabled = false;
+            cancelBtn.textContent = 'Cancel Booking';
+            showToast('Could not cancel booking', 'error');
+          }
+        });
+      }
+
+      return item;
+    }
+
     function renderBookings() {
       const searchTerm = bookingSearch.value.trim().toLowerCase();
       const hidePast = hidePastToggle.checked;
       const hideCancelled = hideCancelledToggle.checked;
       const today = todayStr();
 
-      let filtered = allBookings.filter(b => b.status !== 'completed'); // completed jobs live in their own tab
+      // Confirmed and Completed bookings live in their own tabs
+      let filtered = allBookings.filter(b => b.status !== 'completed' && b.status !== 'confirmed');
 
       if (hidePast) filtered = filtered.filter(b => b.date >= today);
       if (hideCancelled) filtered = filtered.filter(b => b.status !== 'cancelled');
@@ -1528,141 +1738,42 @@
       }
 
       bookingList.innerHTML = '';
-      filtered.forEach(booking => {
-        const item = document.createElement('div');
-        const isCancelled = booking.status === 'cancelled';
-        item.className = 'list-item' + (booking.date < today ? ' past' : booking.date === today ? ' today' : '') + (isCancelled ? ' past' : '');
-
-        const dateDisplay = formatDate(booking.date);
-        const gmailSubject = `Re: Your appointment request — ${dateDisplay} at ${booking.time}`;
-        const gmailBody = `Hi ${booking.name || ''},\n\n`;
-        const gmailUrl = booking.email
-          ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(booking.email)}&su=${encodeURIComponent(gmailSubject)}&body=${encodeURIComponent(gmailBody)}`
-          : null;
-        const telUrl = booking.phone ? `tel:${encodeURIComponent(booking.phone)}` : null;
-        const smsUrl = booking.phone ? `sms:${encodeURIComponent(booking.phone)}` : null;
-        const gcalUrl = googleCalendarUrl(booking);
-
-        item.innerHTML = `
-          <div class="item-text">
-            <div class="when">${dateDisplay} at ${escapeHtml(booking.time)}${booking.date === today ? '<span class="today-badge">Today</span>' : ''}${isCancelled ? '<span class="cancelled-badge">Cancelled</span>' : ''}</div>
-            <div><span class="label">Name:</span> ${escapeHtml(booking.name) || '—'}</div>
-            <div class="contact-line">
-              <span><span class="label">Email:</span> ${escapeHtml(booking.email) || '—'}</span>
-              ${booking.email ? `<button class="copy-btn" title="Copy email" data-copy="${escapeHtml(booking.email)}" data-label="Email">⧉</button>` : ''}
-            </div>
-            <div class="contact-line">
-              <span><span class="label">Phone:</span> ${escapeHtml(booking.phone) || '—'}</span>
-              ${booking.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${escapeHtml(booking.phone)}" data-label="Phone">⧉</button>` : ''}
-            </div>
-            ${booking.notes ? `<div><span class="label">Notes:</span> ${escapeHtml(booking.notes)}</div>` : ''}
-          </div>
-          <div class="item-actions">
-            ${gmailUrl ? `<a href="${gmailUrl}" target="_blank" rel="noopener" class="action-btn reply">Reply via Gmail</a>` : ''}
-            ${telUrl ? `<a href="${telUrl}" class="action-btn unblock">Call</a>` : ''}
-            ${smsUrl ? `<a href="${smsUrl}" class="action-btn unblock">Text</a>` : ''}
-            <a href="${gcalUrl}" target="_blank" rel="noopener" class="action-btn unblock">Add to Calendar</a>
-            ${isCancelled ? '' : '<button class="action-btn unblock complete">Mark Completed</button>'}
-            ${isCancelled ? '' : '<button class="action-btn cancel">Cancel Booking</button>'}
-          </div>
-          <div style="flex-basis: 100%;">
-            <textarea class="job-notes-area admin-notes-area" data-booking-id="${booking.id}" placeholder="Add a private note about this booking…">${escapeHtml(booking.adminNotes)}</textarea>
-            <button class="btn small save-admin-notes-btn">Save Note</button>
-          </div>
-        `;
-
-        item.querySelectorAll('.copy-btn').forEach(btn => {
-          btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, btn.dataset.label));
-        });
-
-        const adminNotesArea = item.querySelector('.admin-notes-area');
-        const saveAdminNotesBtn = item.querySelector('.save-admin-notes-btn');
-        saveAdminNotesBtn.addEventListener('click', async () => {
-          saveAdminNotesBtn.disabled = true;
-          saveAdminNotesBtn.textContent = 'Saving…';
-          try {
-            await updateDoc(doc(db, 'bookings', booking.id), {
-              adminNotes: adminNotesArea.value
-            });
-            showToast('Note saved', 'success');
-          } catch (err) {
-            console.error(err);
-            showToast('Could not save note', 'error');
-          } finally {
-            saveAdminNotesBtn.disabled = false;
-            saveAdminNotesBtn.textContent = 'Save Note';
-          }
-        });
-
-        const completeBtn = item.querySelector('.complete');
-        if (completeBtn) {
-          completeBtn.addEventListener('click', async () => {
-            if (!confirm(`Mark the booking for ${booking.name} on ${dateDisplay} at ${booking.time} as completed? It'll move to the Completed Jobs tab.`)) return;
-            completeBtn.disabled = true;
-            completeBtn.textContent = 'Saving…';
-            try {
-              await updateDoc(doc(db, 'bookings', booking.id), {
-                status: 'completed',
-                completedAt: Timestamp.now()
-              });
-              showToast('Booking marked completed', 'success');
-              await logAction('booking_completed', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
-            } catch (err) {
-              console.error(err);
-              completeBtn.disabled = false;
-              completeBtn.textContent = 'Mark Completed';
-              showToast('Could not mark as completed', 'error');
-            }
-          });
-        }
-
-        const cancelBtn = item.querySelector('.cancel');
-        if (cancelBtn) {
-          cancelBtn.addEventListener('click', async () => {
-            if (!confirm(`Cancel the booking for ${booking.name} on ${dateDisplay} at ${booking.time}?`)) return;
-            cancelBtn.disabled = true;
-            cancelBtn.textContent = 'Cancelling…';
-            try {
-              // Mark cancelled rather than deleting, so it stays visible as
-              // history — only the held time slot is actually removed.
-              await updateDoc(doc(db, 'bookings', booking.id), {
-                status: 'cancelled',
-                cancelledAt: Timestamp.now()
-              });
-              if (booking.slotId) await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
-              await logAction('booking_cancelled', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
-
-              showUndoToast('Booking cancelled', async () => {
-                try {
-                  await updateDoc(doc(db, 'bookings', booking.id), { status: null });
-                  if (booking.slotId) {
-                    await setDoc(doc(db, 'bookedSlots', booking.slotId), {
-                      date: booking.date, time: booking.time, bookedAt: Timestamp.now()
-                    });
-                  }
-                  showToast('Cancellation undone', 'success');
-                  await logAction('booking_cancel_undone', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
-                } catch (err) {
-                  console.error(err);
-                  showToast('Could not undo — that time may have been taken since', 'error');
-                }
-              });
-            } catch (err) {
-              console.error(err);
-              cancelBtn.disabled = false;
-              cancelBtn.textContent = 'Cancel Booking';
-              showToast('Could not cancel booking', 'error');
-            }
-          });
-        }
-
-        bookingList.appendChild(item);
-      });
+      filtered.forEach(booking => bookingList.appendChild(buildBookingItem(booking, today)));
 
       restoreFocusedTextarea(bookingList, 'data-booking-id', preservedNote);
     }
 
+    function renderConfirmedBookings() {
+      const searchTerm = confirmedSearch.value.trim().toLowerCase();
+      const today = todayStr();
+
+      let filtered = allBookings.filter(b => b.status === 'confirmed');
+
+      if (searchTerm) {
+        filtered = filtered.filter(b =>
+          (b.name || '').toLowerCase().includes(searchTerm) ||
+          (b.email || '').toLowerCase().includes(searchTerm) ||
+          (b.phone || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      confirmedCount.textContent = filtered.length;
+
+      const preservedNote = captureFocusedTextarea(confirmedList, 'data-booking-id');
+
+      if (filtered.length === 0) {
+        confirmedList.innerHTML = `<p class="empty-note">${allBookings.filter(b => b.status === 'confirmed').length === 0 ? 'No confirmed bookings yet.' : 'No confirmed bookings match your search.'}</p>`;
+        return;
+      }
+
+      confirmedList.innerHTML = '';
+      filtered.forEach(booking => confirmedList.appendChild(buildBookingItem(booking, today)));
+
+      restoreFocusedTextarea(confirmedList, 'data-booking-id', preservedNote);
+    }
+
     bookingSearch.addEventListener('input', renderBookings);
+    confirmedSearch.addEventListener('input', renderConfirmedBookings);
     hidePastToggle.addEventListener('change', renderBookings);
     hideCancelledToggle.addEventListener('change', renderBookings);
 
