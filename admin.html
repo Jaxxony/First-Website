@@ -586,7 +586,6 @@
         showToast('Could not copy — select and copy manually', 'error');
       }
     }
-    window.__copyToClipboard = copyToClipboard; // exposed for inline onclick handlers
 
     // ============================
     // LOGIN THROTTLING
@@ -719,8 +718,8 @@
         row.className = 'log-item';
         row.innerHTML = `
           <div>
-            <span class="log-action">${ACTION_LABELS[entry.action] || entry.action}</span>
-            ${entry.detail ? `<span class="log-detail"> — ${entry.detail}</span>` : ''}
+            <span class="log-action">${escapeHtml(ACTION_LABELS[entry.action] || entry.action)}</span>
+            ${entry.detail ? `<span class="log-detail"> — ${escapeHtml(entry.detail)}</span>` : ''}
           </div>
           <span class="log-when">${when}</span>
         `;
@@ -844,6 +843,47 @@
       const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
+    }
+
+    // Every value below comes from a public form (the booking form's
+    // underlying Firestore writes aren't otherwise validated), so anything
+    // shown here must be escaped before going into innerHTML. Without this,
+    // a booking submitted with a name like <img src=x onerror=...> would
+    // execute inside this authenticated admin session the moment the list
+    // renders it.
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // These lists re-render fully on every live update (e.g. an unrelated
+    // new booking coming in while you're mid-note). Without this, whatever
+    // you were typing into a notes textarea at that moment gets wiped along
+    // with the rest of the DOM. Capture it before clearing, restore it after.
+    function captureFocusedTextarea(container, attr) {
+      const active = document.activeElement;
+      if (active && container.contains(active) && active.tagName === 'TEXTAREA') {
+        return {
+          id: active.getAttribute(attr),
+          value: active.value,
+          selStart: active.selectionStart,
+          selEnd: active.selectionEnd
+        };
+      }
+      return null;
+    }
+    function restoreFocusedTextarea(container, attr, captured) {
+      if (!captured) return;
+      const el = container.querySelector(`textarea[${attr}="${CSS.escape(captured.id || '')}"]`);
+      if (!el) return;
+      el.value = captured.value;
+      el.focus();
+      try { el.setSelectionRange(captured.selStart, captured.selEnd); } catch {}
     }
 
     // ============================
@@ -1023,6 +1063,7 @@
     // BLOCKED TIMES LIST (live)
     // ============================
     let unsubscribeBlockedTimes = null;
+    let latestBlockedSlots = []; // cached so a bookings-only update can re-render this list too
 
     function subscribeBlockedTimes() {
       blockedList.innerHTML = '<p class="empty-note">Loading…</p>';
@@ -1031,9 +1072,9 @@
       // an orphaned or unexpected entry (no matching booking, no manualBlock
       // flag) is invisible here and impossible to remove from the panel.
       unsubscribeBlockedTimes = onSnapshot(collection(db, 'bookedSlots'), (snapshot) => {
-        const blocks = [];
-        snapshot.forEach(docSnap => blocks.push({ id: docSnap.id, ...docSnap.data() }));
-        renderBlockedTimes(blocks);
+        latestBlockedSlots = [];
+        snapshot.forEach(docSnap => latestBlockedSlots.push({ id: docSnap.id, ...docSnap.data() }));
+        renderBlockedTimes(latestBlockedSlots);
       }, (err) => {
         console.error('Blocked times listener error:', err);
         blockedList.innerHTML = '<p class="empty-note">Could not load blocked times.</p>';
@@ -1115,7 +1156,7 @@
 
         item.innerHTML = `
           <div class="item-text">
-            <div class="when">${formatDate(block.date)} at ${block.time}${block.date === today ? '<span class="today-badge">Today</span>' : ''}</div>
+            <div class="when">${formatDate(block.date)} at ${escapeHtml(block.time)}${block.date === today ? '<span class="today-badge">Today</span>' : ''}</div>
           </div>
           <div class="item-actions">
             <button class="action-btn unblock">Unblock</button>
@@ -1152,8 +1193,8 @@
 
         item.innerHTML = `
           <div class="item-text">
-            <div class="when">${formatDate(block.date)} at ${block.time} ${label}</div>
-            ${linkedBooking ? `<div><span class="label">Booked by:</span> ${linkedBooking.name || 'Unnamed'}</div>` : '<div class="empty-note" style="padding: 0;">No booking record is linked to this slot.</div>'}
+            <div class="when">${formatDate(block.date)} at ${escapeHtml(block.time)} ${label}</div>
+            ${linkedBooking ? `<div><span class="label">Booked by:</span> ${escapeHtml(linkedBooking.name) || 'Unnamed'}</div>` : '<div class="empty-note" style="padding: 0;">No booking record is linked to this slot.</div>'}
           </div>
           <div class="item-actions">
             <button class="action-btn unblock">${linkedBooking ? 'Force Remove' : 'Remove'}</button>
@@ -1199,6 +1240,11 @@
 
         updateStats();
         renderBookings();
+        // The Blocked Times "Live booking" vs "No matching record" labels
+        // depend on allBookings — refresh that list too so it can't show a
+        // stale label between when a booking changes and when bookedSlots
+        // next happens to change on its own.
+        if (latestBlockedSlots.length > 0) renderBlockedTimes(latestBlockedSlots);
       }, (err) => {
         console.error('Bookings listener error:', err);
         bookingList.innerHTML = '<p class="empty-note">Could not load bookings.</p>';
@@ -1241,6 +1287,8 @@
 
       bookingsCount.textContent = filtered.length;
 
+      const preservedNote = captureFocusedTextarea(bookingList, 'data-booking-id');
+
       if (filtered.length === 0) {
         bookingList.innerHTML = `<p class="empty-note">${allBookings.length === 0 ? 'No bookings yet.' : 'No bookings match your search/filters.'}</p>`;
         return;
@@ -1261,17 +1309,17 @@
 
         item.innerHTML = `
           <div class="item-text">
-            <div class="when">${dateDisplay} at ${booking.time}${booking.date === today ? '<span class="today-badge">Today</span>' : ''}${isCancelled ? '<span class="cancelled-badge">Cancelled</span>' : ''}</div>
-            <div><span class="label">Name:</span> ${booking.name || '—'}</div>
+            <div class="when">${dateDisplay} at ${escapeHtml(booking.time)}${booking.date === today ? '<span class="today-badge">Today</span>' : ''}${isCancelled ? '<span class="cancelled-badge">Cancelled</span>' : ''}</div>
+            <div><span class="label">Name:</span> ${escapeHtml(booking.name) || '—'}</div>
             <div class="contact-line">
-              <span><span class="label">Email:</span> ${booking.email || '—'}</span>
-              ${booking.email ? `<button class="copy-btn" title="Copy email" data-copy="${booking.email}" data-label="Email">⧉</button>` : ''}
+              <span><span class="label">Email:</span> ${escapeHtml(booking.email) || '—'}</span>
+              ${booking.email ? `<button class="copy-btn" title="Copy email" data-copy="${escapeHtml(booking.email)}" data-label="Email">⧉</button>` : ''}
             </div>
             <div class="contact-line">
-              <span><span class="label">Phone:</span> ${booking.phone || '—'}</span>
-              ${booking.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${booking.phone}" data-label="Phone">⧉</button>` : ''}
+              <span><span class="label">Phone:</span> ${escapeHtml(booking.phone) || '—'}</span>
+              ${booking.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${escapeHtml(booking.phone)}" data-label="Phone">⧉</button>` : ''}
             </div>
-            ${booking.notes ? `<div><span class="label">Notes:</span> ${booking.notes}</div>` : ''}
+            ${booking.notes ? `<div><span class="label">Notes:</span> ${escapeHtml(booking.notes)}</div>` : ''}
           </div>
           <div class="item-actions">
             ${gmailUrl ? `<a href="${gmailUrl}" target="_blank" rel="noopener" class="action-btn reply">Reply via Gmail</a>` : ''}
@@ -1279,7 +1327,7 @@
             ${isCancelled ? '' : '<button class="action-btn cancel">Cancel Booking</button>'}
           </div>
           <div style="flex-basis: 100%;">
-            <textarea class="job-notes-area admin-notes-area" placeholder="Add a private note about this booking…">${booking.adminNotes || ''}</textarea>
+            <textarea class="job-notes-area admin-notes-area" data-booking-id="${booking.id}" placeholder="Add a private note about this booking…">${escapeHtml(booking.adminNotes)}</textarea>
             <button class="btn small save-admin-notes-btn">Save Note</button>
           </div>
         `;
@@ -1356,6 +1404,8 @@
 
         bookingList.appendChild(item);
       });
+
+      restoreFocusedTextarea(bookingList, 'data-booking-id', preservedNote);
     }
 
     bookingSearch.addEventListener('input', renderBookings);
@@ -1410,6 +1460,8 @@
 
       completedCount.textContent = allCompleted.length;
 
+      const preservedNote = captureFocusedTextarea(completedList, 'data-job-id');
+
       if (filtered.length === 0) {
         completedList.innerHTML = `<p class="empty-note">${allCompleted.length === 0 ? 'No completed jobs yet.' : 'No completed jobs match your search.'}</p>`;
         return;
@@ -1426,19 +1478,19 @@
 
         item.innerHTML = `
           <div class="item-text" style="margin-bottom: 10px;">
-            <div class="when">${dateDisplay} at ${job.time}</div>
-            <div><span class="label">Name:</span> ${job.name || '—'}</div>
+            <div class="when">${dateDisplay} at ${escapeHtml(job.time)}</div>
+            <div><span class="label">Name:</span> ${escapeHtml(job.name) || '—'}</div>
             <div class="contact-line">
-              <span><span class="label">Email:</span> ${job.email || '—'}</span>
-              ${job.email ? `<button class="copy-btn" title="Copy email" data-copy="${job.email}" data-label="Email">⧉</button>` : ''}
+              <span><span class="label">Email:</span> ${escapeHtml(job.email) || '—'}</span>
+              ${job.email ? `<button class="copy-btn" title="Copy email" data-copy="${escapeHtml(job.email)}" data-label="Email">⧉</button>` : ''}
             </div>
             <div class="contact-line">
-              <span><span class="label">Phone:</span> ${job.phone || '—'}</span>
-              ${job.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${job.phone}" data-label="Phone">⧉</button>` : ''}
+              <span><span class="label">Phone:</span> ${escapeHtml(job.phone) || '—'}</span>
+              ${job.phone ? `<button class="copy-btn" title="Copy phone" data-copy="${escapeHtml(job.phone)}" data-label="Phone">⧉</button>` : ''}
             </div>
           </div>
 
-          <textarea class="job-notes-area" placeholder="Job notes — materials used, price, anything worth remembering...">${job.completionNotes || ''}</textarea>
+          <textarea class="job-notes-area" data-job-id="${job.id}" placeholder="Job notes — materials used, price, anything worth remembering...">${escapeHtml(job.completionNotes)}</textarea>
           <div class="admin-row" style="margin-bottom: 0;">
             <button class="btn small save-notes-btn">Save Notes</button>
             <button class="action-btn cancel delete-job-btn">Delete Job Record</button>
@@ -1489,6 +1541,8 @@
 
         completedList.appendChild(item);
       });
+
+      restoreFocusedTextarea(completedList, 'data-job-id', preservedNote);
     }
 
     completedSearch.addEventListener('input', renderCompletedJobs);
