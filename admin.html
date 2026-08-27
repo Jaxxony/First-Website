@@ -24,6 +24,8 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
+    html { scroll-behavior: smooth; }
+
     body {
       background: #0D0D0D;
       background-image: radial-gradient(circle at 15% 0%, rgba(120, 150, 255, 0.06), transparent 40%),
@@ -346,6 +348,55 @@
     .tab-btn.active { color: white; border-bottom-color: white; }
     .tab-btn .count-pill { margin-left: 6px; }
 
+    /* ---- Quick-jump section nav ---- */
+    .jump-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      position: sticky;
+      top: 66px;
+      z-index: 50;
+      background: rgba(13, 13, 13, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 8px 0;
+    }
+    .jump-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .jump-link:hover { background: rgba(255, 255, 255, 0.15); color: white; border-color: rgba(255, 255, 255, 0.3); }
+
+    .section-head h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-icon { font-size: 15px; }
+
+    /* Small coloured accent bar on each stat card, matching what the stat represents */
+    .stat-card { position: relative; overflow: hidden; }
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 3px;
+    }
+    .stat-card.accent-blue::before { background: rgba(120, 180, 255, 0.7); }
+    .stat-card.accent-green::before { background: rgba(120, 200, 150, 0.7); }
+    .stat-card.accent-red::before { background: rgba(255, 130, 130, 0.7); }
+
     .job-notes-area {
       width: 100%;
       background: rgba(255, 255, 255, 0.08);
@@ -448,25 +499,32 @@
 
       <div id="tabActive" class="tab-panel">
 
+      <div class="jump-nav">
+        <a href="#section-block" class="jump-link">🗓️ Block a Time</a>
+        <a href="#section-blocked" class="jump-link">🚫 Blocked Times</a>
+        <a href="#section-bookings" class="jump-link">📖 Bookings</a>
+        <a href="#section-activity" class="jump-link">📜 Activity</a>
+      </div>
+
       <div class="stats-row">
-        <div class="stat-card">
+        <div class="stat-card accent-blue">
           <div class="stat-value" id="statUpcoming">—</div>
           <div class="stat-label">Upcoming Bookings</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card accent-green">
           <div class="stat-value" id="statNext">—</div>
           <div class="stat-label">Next Appointment</div>
           <div class="stat-sub" id="statNextSub"></div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card accent-red">
           <div class="stat-value" id="statBlocked">—</div>
           <div class="stat-label">Blocked Days / Times</div>
         </div>
       </div>
 
-      <div class="section card">
+      <div class="section card" id="section-block">
         <div class="section-head">
-          <h2>Block a Time</h2>
+          <h2><span class="section-icon">🗓️</span> Block a Time</h2>
         </div>
         <p class="empty-note" style="margin-bottom: 12px;">Pick a date and time to mark it unavailable on the public calendar — for days off, breaks, or anything not booked through the site.</p>
         <div class="admin-row">
@@ -480,18 +538,18 @@
         <p class="login-error" id="blockError"></p>
       </div>
 
-      <div class="section card">
+      <div class="section card" id="section-blocked">
         <div class="section-head">
-          <h2>Blocked Times <span class="count-pill" id="blockedCount">0</span></h2>
+          <h2><span class="section-icon">🚫</span> Blocked Times <span class="count-pill" id="blockedCount">0</span></h2>
         </div>
         <div class="item-list" id="blockedList">
           <p class="empty-note">Loading…</p>
         </div>
       </div>
 
-      <div class="section card">
+      <div class="section card" id="section-bookings">
         <div class="section-head">
-          <h2>Bookings <span class="count-pill" id="bookingsCount">0</span></h2>
+          <h2><span class="section-icon">📖</span> Bookings <span class="count-pill" id="bookingsCount">0</span></h2>
           <div class="toolbar">
             <input type="search" id="bookingSearch" placeholder="Search name, email or phone…">
             <label class="toggle-label">
@@ -510,9 +568,9 @@
         </div>
       </div>
 
-      <div class="section card">
+      <div class="section card" id="section-activity">
         <div class="section-head">
-          <h2>Recent Activity</h2>
+          <h2><span class="section-icon">📜</span> Recent Activity</h2>
           <button class="btn small" id="clearActivityBtn">Clear Recent Activity</button>
         </div>
         <div id="activityLog">
@@ -525,7 +583,7 @@
       <div id="tabCompleted" class="tab-panel" style="display: none;">
         <div class="section card">
           <div class="section-head">
-            <h2>Completed Jobs</h2>
+            <h2><span class="section-icon">✅</span> Completed Jobs</h2>
             <div class="toolbar">
               <input type="search" id="completedSearch" placeholder="Search name, email or phone…">
             </div>
@@ -934,18 +992,30 @@
     // BROWSER NOTIFICATIONS FOR NEW BOOKINGS
     // ============================
     const notifyBtn = document.getElementById('notifyBtn');
+    const NOTIFY_MUTE_KEY = 'adminNotificationsMuted';
+
+    function isNotifyMuted() {
+      return localStorage.getItem(NOTIFY_MUTE_KEY) === 'true';
+    }
+    function setNotifyMuted(muted) {
+      localStorage.setItem(NOTIFY_MUTE_KEY, muted ? 'true' : 'false');
+    }
 
     function updateNotifyBtnLabel() {
       if (!('Notification' in window)) {
         notifyBtn.style.display = 'none';
         return;
       }
-      if (Notification.permission === 'granted') {
-        notifyBtn.textContent = '🔔 Notifications On';
-        notifyBtn.disabled = true;
-      } else if (Notification.permission === 'denied') {
+      if (Notification.permission === 'denied') {
         notifyBtn.textContent = '🔕 Notifications Blocked';
         notifyBtn.disabled = true;
+      } else if (Notification.permission === 'granted') {
+        if (isNotifyMuted()) {
+          notifyBtn.textContent = '🔕 Notifications Muted';
+        } else {
+          notifyBtn.textContent = '🔔 Notifications On';
+        }
+        notifyBtn.disabled = false;
       } else {
         notifyBtn.textContent = '🔔 Enable Notifications';
         notifyBtn.disabled = false;
@@ -955,12 +1025,24 @@
 
     notifyBtn.addEventListener('click', async () => {
       if (!('Notification' in window)) return;
+
+      if (Notification.permission === 'granted') {
+        // Already granted at the browser level — this button now just
+        // toggles a local mute flag, since the page itself can't revoke
+        // browser permission (only the person can, in browser settings).
+        setNotifyMuted(!isNotifyMuted());
+        updateNotifyBtnLabel();
+        showToast(isNotifyMuted() ? 'Notifications muted' : 'Notifications on', 'success');
+        return;
+      }
+
       await Notification.requestPermission();
+      setNotifyMuted(false);
       updateNotifyBtnLabel();
     });
 
     function notifyNewBooking(booking) {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      if (!('Notification' in window) || Notification.permission !== 'granted' || isNotifyMuted()) return;
       new Notification('New booking request', {
         body: `${booking.name || 'Someone'} — ${formatDate(booking.date)} at ${booking.time}`
       });
