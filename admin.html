@@ -1085,7 +1085,12 @@
     // CSV EXPORT
     // ============================
     function csvEscape(value) {
-      const str = String(value ?? '');
+      let str = String(value ?? '');
+      // Formula-injection guard: Excel/Sheets can execute a cell starting
+      // with =, +, -, or @ as a formula when the file is opened. A booking
+      // name or note is attacker-controlled input, so neutralise that by
+      // prefixing with a straight quote, which forces it to be read as text.
+      if (/^[=+\-@]/.test(str)) str = `'${str}`;
       if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
       return str;
     }
@@ -1678,17 +1683,42 @@
               status: 'cancelled',
               cancelledAt: Timestamp.now()
             });
-            if (booking.slotId) await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
+            // Verify the slot this booking claims actually matches its own
+            // date/time before freeing it — a booking's slotId isn't fully
+            // trustworthy (see the rules comment on the bookings collection),
+            // so this stops cancelling a malformed/malicious booking from
+            // accidentally freeing a real, unrelated customer's held time.
+            if (booking.slotId) {
+              try {
+                const slotSnap = await getDoc(doc(db, 'bookedSlots', booking.slotId));
+                const slotData = slotSnap.exists() ? slotSnap.data() : null;
+                if (slotData && slotData.date === booking.date && slotData.time === booking.time) {
+                  await deleteDoc(doc(db, 'bookedSlots', booking.slotId));
+                } else if (slotData) {
+                  console.warn('Skipped freeing slot on cancel — date/time did not match the booking:', booking.id, booking.slotId);
+                  showToast('Cancelled, but the linked time slot looked mismatched — check Blocked Times manually', 'error');
+                }
+              } catch (slotErr) {
+                console.error('Could not verify slot before freeing it:', slotErr);
+              }
+            }
             await logAction('booking_cancelled', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
 
             showUndoToast('Booking cancelled', async () => {
               try {
-                await updateDoc(doc(db, 'bookings', booking.id), { status: null });
+                // Recreate the held slot FIRST. If someone else has already
+                // booked this exact time in the meantime, this write is
+                // rejected by the rules (a slot can only be created, never
+                // overwritten) — so we deliberately check this before
+                // touching the booking's own status, otherwise a failed
+                // slot-recreation could still leave the booking marked
+                // "active" while the time is actually held by someone else.
                 if (booking.slotId) {
                   await setDoc(doc(db, 'bookedSlots', booking.slotId), {
                     date: booking.date, time: booking.time, bookedAt: Timestamp.now()
                   });
                 }
+                await updateDoc(doc(db, 'bookings', booking.id), { status: null });
                 showToast('Cancellation undone', 'success');
                 await logAction('booking_cancel_undone', `${booking.name || 'Unnamed'} — ${dateDisplay} at ${booking.time}`);
               } catch (err) {
