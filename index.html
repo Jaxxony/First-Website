@@ -123,20 +123,31 @@
 
 <div id="services" class="content">
   <h2>Our Services</h2>
-  <div class="servicestxt">
-    <p>We provide professional flatpack cabinets ready for assembly for homes, offices and businesses.</p>
-    <p>Our Services Include:</p>
-    <p>Kitchen flatpack cabinets</p>
-    <p>Storage cabinets</p>
-    <p>Doors and drawers</p>
-    <p>Shelving</p>
-    <p>Handles and hardware</p>
-    <p>Cabinet adjustments and finishing</p>
-    <p>We carefully assemble your flatpack cabinets, ensuring everything is correctly fitted, aligned and ready to use.
+  <div class="services-columns">
+    <div class="servicestxt">
+      <p>We provide professional flatpack cabinets ready for assembly for homes, offices and businesses.</p>
+      <p>Our Services Include:</p>
+      <p>Kitchen flatpack cabinets</p>
+      <p>Storage cabinets</p>
+      <p>Doors and drawers</p>
+      <p>Shelving</p>
+      <p>Handles and hardware</p>
+      <p>Cabinet adjustments and finishing</p>
+      <p>We carefully assemble your flatpack cabinets, ensuring everything is correctly fitted, aligned and ready to use.
 
-Save time and avoid the hassle of assembling flatpacks yourself. We take care of the hard work and deliver a neat, professional result.
+  Save time and avoid the hassle of assembling flatpacks yourself. We take care of the hard work and deliver a neat, professional result.
 
- </p>
+   </p>
+    </div>
+
+    <!--
+      SERVICES IMAGE: to change the picture on the right, just replace
+      the file at images/services.jpg with your own image (keep the
+      same filename "services.jpg") — no code changes needed.
+    -->
+    <div class="services-image">
+      <img src="./images/1.jpg" alt="Custom flatpack kitchen cabinetry by Custom Flatpacks Adelaide" loading="lazy">
+    </div>
   </div>
 </div>
 
@@ -229,7 +240,7 @@ We understand that not all spaces are the same, unlike the Big-Box Suppliers, ev
   updateActiveLink(); // run once on load too
 </script>
 <script>
-  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .content h2, .des2, .des3, .quotebutton, .scroll-cue, .top-bar, .gallery h1, .gallery h2, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt');
+  const fadeElements = document.querySelectorAll('.gallery img, .content h1, .content h2, .des2, .des3, .quotebutton, .scroll-cue, .top-bar, .gallery h1, .gallery h2, .contactme, .description, #aboutus, #imagetop, #imagebottom, .servicestxt, .services-image');
 
   // threshold: 0 + a bottom rootMargin (instead of threshold: 0.2) fixes the
   // flicker that happened when only a sliver of an element was on screen:

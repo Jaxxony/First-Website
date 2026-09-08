@@ -516,6 +516,41 @@ img {
     z-index: 1000;
 }
 
+/* Services layout: original text bubble on the left, a large image on
+   the right. flex-wrap drops the image below once the viewport is too
+   narrow for both side by side. */
+.services-columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  padding: 0 35px;
+}
+
+.services-image {
+  flex: 1 1 500px;
+  max-width: 650px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.services-image.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.services-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  object-fit: cover;
+}
+
 /* One box for the whole Services text block — every line inside it is a
    plain <p>, so they all share this single background instead of each
    line getting its own. */
@@ -524,7 +559,6 @@ img {
   text-transform: capitalize;
   max-width: 600px;
   width: min(90%, 600px);
-  margin-left: 35px;
   margin-bottom: 35px;
   font-size: clamp(14px, 1.6vw, 22px);
   background: rgba(255, 255, 255, 0.08);
