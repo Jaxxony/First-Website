@@ -383,6 +383,12 @@ img {
     transform: translateY(0);
 }
 
+.contactme h1,
+.contactme h2 {
+    font-size: 2em;
+    font-weight: bold;
+}
+
 .contact-details {
     flex: 1 1 300px;
     min-width: 0;
@@ -424,6 +430,10 @@ img {
     text-decoration: underline;
 }
 
+#cabmakers a {
+    text-decoration: underline;
+}
+
 .contactme img {
     width: 26px;
     height: 26px;
@@ -435,7 +445,8 @@ img {
 /* ============================
    SECTION TEXT (headings/description)
    ============================ */
-.content h1 {
+.content h1,
+.content h2 {
     font-size: clamp(28px, 6vw, 70px);
     display: flex;
     flex-direction: column;
@@ -447,7 +458,8 @@ img {
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.content h1.visible {
+.content h1.visible,
+.content h2.visible {
     opacity: 1;
     transform: translateY(0);
 }
@@ -585,6 +597,7 @@ img {
   left: 0;
   color: white;
 }
+
 #imagebottom {
   height: 320px;
   width: 240px;
@@ -791,7 +804,8 @@ img {
 .gallery img.visible:hover {
     transform: translateY(0) scale(1.2);
 }
-.gallery h1 {
+.gallery h1,
+.gallery h2 {
     width: 100%;
     margin: 0 auto;
     text-align: center;
@@ -801,14 +815,17 @@ img {
     transform: translateY(40px);
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.gallery h1.visible {
+.gallery h1.visible,
+.gallery h2.visible {
     opacity: 1;
     transform: translateY(0);
 }
-.gallery h1.visible:hover {
+.gallery h1.visible:hover,
+.gallery h2.visible:hover {
     transform: translateY(0) scale(1.025);
 }
-.gallery h1:hover {
+.gallery h1:hover,
+.gallery h2:hover {
     transform: scale(1.025);
 }
 
@@ -1117,7 +1134,8 @@ img {
 
 /* ---- Tablets ---- */
 @media (max-width: 900px) {
-  .content h1 {
+  .content h1,
+  .content h2 {
     font-size: clamp(26px, 5vw, 44px);
   }
 
@@ -1238,7 +1256,8 @@ img {
     align-items: flex-start;
   }
 
-  .content h1 {
+  .content h1,
+  .content h2 {
     font-size: clamp(26px, 8vw, 34px);
     margin-left: 0;
     padding: 0;
@@ -1288,7 +1307,8 @@ img {
     height: 160px;
   }
 
-  .gallery h1 {
+  .gallery h1,
+  .gallery h2 {
     padding: 10px;
   }
 
@@ -1311,7 +1331,8 @@ img {
     font-size: 15px;
   }
 
-  .contactme h1 {
+  .contactme h1,
+  .contactme h2 {
     font-size: 28px;
   }
 
@@ -1341,7 +1362,8 @@ img {
     font-size: 13px;
   }
 
-  .contactme h1 {
+  .contactme h1,
+  .contactme h2 {
     font-size: 24px;
   }
 }
